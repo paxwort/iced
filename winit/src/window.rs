@@ -55,7 +55,7 @@ where
     pub fn insert(
         &mut self,
         id: Id,
-        window: Arc<dyn winit::window::Window>,
+        window: Arc<Box<dyn winit::window::Window>>,
         program: &program::Instance<P>,
         compositor: &mut C,
         proxy: Proxy<P::Message>,
@@ -179,7 +179,7 @@ where
     C: Compositor<Renderer = P::Renderer>,
     P::Theme: theme::Base,
 {
-    pub raw: Arc<dyn winit::window::Window>,
+    pub raw: Arc<Box<dyn winit::window::Window>>,
     pub waker: shell::Waker,
     pub state: State<P>,
     pub exit_on_close_request: bool,

@@ -446,7 +446,7 @@ where
 enum Event<Message: 'static> {
     WindowCreated {
         id: window::Id,
-        window: Arc<dyn winit::window::Window>,
+        window: Arc<Box<dyn winit::window::Window>>,
         exit_on_close_request: bool,
         make_visible: bool,
         on_open: oneshot::Sender<window::Id>,
