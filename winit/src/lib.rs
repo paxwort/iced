@@ -36,6 +36,8 @@ mod window;
 pub use clipboard::Clipboard;
 pub use error::Error;
 pub use proxy::Proxy;
+use winit::event::StartCause;
+use winit::window::Window;
 
 use crate::core::backend;
 use crate::core::mouse;
@@ -77,7 +79,7 @@ where
     let settings = program.settings();
     let window_settings = program.window();
 
-    let event_loop = EventLoop::with_user_event()
+    let event_loop = EventLoop::builder()
         .build()
         .expect("Create event loop");
 
@@ -85,7 +87,9 @@ where
     let renderer_settings = renderer::Settings::from(&settings);
     let display_handle = event_loop.owned_display_handle();
 
-    let (proxy, worker) = Proxy::new(event_loop.create_proxy());
+    let (user_sender, user_receiver) = mpsc::unbounded();
+
+    let (proxy, worker) = Proxy::new(event_loop.create_proxy(), user_sender);
 
     #[cfg(feature = "debug")]
     {
@@ -150,6 +154,7 @@ where
         id: Option<String>,
         sender: mpsc::UnboundedSender<Event<Action<Message>>>,
         receiver: mpsc::UnboundedReceiver<Control>,
+        user_reciever: mpsc::UnboundedReceiver<Action<Message>>,
         error: Option<Error>,
         system_theme: Option<oneshot::Sender<theme::Mode>>,
 
@@ -163,6 +168,7 @@ where
         id: settings.id,
         sender: event_sender,
         receiver: control_receiver,
+        user_reciever: user_receiver,
         error: None,
         system_theme: Some(system_theme_sender),
 
@@ -172,11 +178,12 @@ where
 
     boot_span.finish();
 
-    impl<Message, F> winit::application::ApplicationHandler<Action<Message>> for Runner<Message, F>
+    impl<Message, F> winit::application::ApplicationHandler for Runner<Message, F>
     where
         F: Future<Output = ()>,
     {
-        fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
+
+    fn can_create_surfaces(&mut self, event_loop: &dyn winit::event_loop::ActiveEventLoop) {
             if let Some(sender) = self.system_theme.take() {
                 let _ = sender.send(
                     event_loop
@@ -185,6 +192,12 @@ where
                         .unwrap_or_default(),
                 );
             }
+        }
+
+
+        // TODO: Find out what needs to happen here. Can_create_surfaces should be called everywhere as far as winit docs say.
+        #[cfg(any(target_os = "macos", target_arch = "wasm32"))]
+        fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         }
 
         fn new_events(
@@ -230,24 +243,14 @@ where
             }
         }
 
-        fn user_event(
-            &mut self,
-            event_loop: &winit::event_loop::ActiveEventLoop,
-            action: Action<Message>,
-        ) {
-            self.process_event(
-                event_loop,
-                Event::EventLoopAwakened(winit::event::Event::UserEvent(action)),
-            );
-        }
+        fn proxy_wake_up(&mut self, event_loop: &dyn winit::event_loop::ActiveEventLoop) {
+            while let Ok(event) = self.user_reciever.try_recv(){
+                // self.process_event(
+                //     event_loop,
+                //     Event::EventLoopAwakened(action),
+                // );
+            }
 
-        fn received_url(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, url: String) {
-            self.process_event(
-                event_loop,
-                Event::EventLoopAwakened(winit::event::Event::PlatformSpecific(
-                    winit::event::PlatformSpecific::MacOS(winit::event::MacOS::ReceivedUrl(url)),
-                )),
-            );
         }
 
         fn about_to_wait(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
@@ -1473,10 +1476,10 @@ fn run_action<'a, P, C>(
             }
             window::Action::Move(id, position) => {
                 if let Some(window) = window_manager.get_mut(id) {
-                    window.raw.set_outer_position(winit::dpi::LogicalPosition {
+                    window.raw.set_outer_position(Position::Logical(winit::dpi::LogicalPosition {
                         x: position.x,
                         y: position.y,
-                    });
+                    }));
                 }
             }
             window::Action::SetMode(id, mode) => {
@@ -1534,10 +1537,10 @@ fn run_action<'a, P, C>(
                 if let Some(window) = window_manager.get_mut(id)
                     && let mouse::Cursor::Available(point) = window.state.cursor()
                 {
-                    window.raw.show_window_menu(winit::dpi::LogicalPosition {
+                    window.raw.show_window_menu(Position::Logical(winit::dpi::LogicalPosition {
                         x: point.x,
                         y: point.y,
-                    });
+                    }));
                 }
             }
             window::Action::GetRawId(id, channel) => {
