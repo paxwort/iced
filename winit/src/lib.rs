@@ -1371,45 +1371,44 @@ fn run_action<'a, P, C>(
             }
             window::Action::Resize(id, size) => {
                 if let Some(window) = window_manager.get_mut(id) {
-                    let _ = window.raw.request_inner_size(
+                    let _ = window.raw.request_surface_size(
                         winit::dpi::LogicalSize {
                             width: size.width,
                             height: size.height,
                         }
-                        .to_physical::<f32>(f64::from(window.state.scale_factor())),
+                        .into(),
                     );
                 }
             }
             window::Action::SetMinSize(id, size) => {
                 if let Some(window) = window_manager.get_mut(id) {
-                    window.raw.set_min_inner_size(size.map(|size| {
+                    window.raw.set_min_surface_size(size.map(|size| {
                         winit::dpi::LogicalSize {
                             width: size.width,
                             height: size.height,
-                        }
-                        .to_physical::<f32>(f64::from(window.state.scale_factor()))
+                        }.into()
                     }));
                 }
             }
             window::Action::SetMaxSize(id, size) => {
                 if let Some(window) = window_manager.get_mut(id) {
-                    window.raw.set_max_inner_size(size.map(|size| {
+                    window.raw.set_max_surface_size(size.map(|size| {
                         winit::dpi::LogicalSize {
                             width: size.width,
                             height: size.height,
                         }
-                        .to_physical::<f32>(f64::from(window.state.scale_factor()))
+                        .into()
                     }));
                 }
             }
             window::Action::SetResizeIncrements(id, increments) => {
                 if let Some(window) = window_manager.get_mut(id) {
-                    window.raw.set_resize_increments(increments.map(|size| {
+                    window.raw.set_surface_resize_increments(increments.map(|size| {
                         winit::dpi::LogicalSize {
                             width: size.width,
                             height: size.height,
                         }
-                        .to_physical::<f32>(f64::from(window.state.scale_factor()))
+                        .into()
                     }));
                 }
             }
@@ -1468,10 +1467,10 @@ fn run_action<'a, P, C>(
             }
             window::Action::Move(id, position) => {
                 if let Some(window) = window_manager.get_mut(id) {
-                    window.raw.set_outer_position(Position::Logical(winit::dpi::LogicalPosition {
+                    window.raw.set_outer_position(winit::dpi::LogicalPosition {
                         x: position.x,
                         y: position.y,
-                    }));
+                    }.into());
                 }
             }
             window::Action::SetMode(id, mode) => {
@@ -1529,15 +1528,15 @@ fn run_action<'a, P, C>(
                 if let Some(window) = window_manager.get_mut(id)
                     && let mouse::Cursor::Available(point) = window.state.cursor()
                 {
-                    window.raw.show_window_menu(Position::Logical(winit::dpi::LogicalPosition {
+                    window.raw.show_window_menu(winit::dpi::LogicalPosition {
                         x: point.x,
                         y: point.y,
-                    }));
+                    }.into());
                 }
             }
             window::Action::GetRawId(id, channel) => {
                 if let Some(window) = window_manager.get_mut(id) {
-                    let _ = channel.send(window.raw.id().into());
+                    let _ = channel.send(window.raw.id().into_raw() as u64);
                 }
             }
             window::Action::Run(id, f) => {
@@ -1576,8 +1575,7 @@ fn run_action<'a, P, C>(
                 if let Some(window) = window_manager.get(id) {
                     let size = window.raw.current_monitor().map(|monitor| {
                         let scale = window.state.scale_factor();
-                        let size = monitor.size().to_logical(f64::from(scale));
-
+                        let size = monitor.current_video_mode().unwrap().size().to_logical(f64::from(scale));
                         Size::new(size.width, size.height)
                     });
 
