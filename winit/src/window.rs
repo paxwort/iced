@@ -1,6 +1,8 @@
 mod state;
 
 use state::State;
+use winit::window::ImeHint;
+use winit::window::ImeRequestData;
 
 pub use crate::core::window::{Event, Id, RedrawRequest, Settings};
 
@@ -20,6 +22,8 @@ use crate::graphics::Compositor;
 use crate::program::{self, Program};
 
 use winit::dpi::{LogicalPosition, LogicalSize};
+use winit::window::{ImeRequest, ImeCapabilities, ImeEnableRequest};
+
 use winit::monitor::MonitorHandle;
 
 use std::collections::BTreeMap;
@@ -51,7 +55,7 @@ where
     pub fn insert(
         &mut self,
         id: Id,
-        window: Arc<winit::window::Window>,
+        window: Arc<dyn winit::window::Window>,
         program: &program::Instance<P>,
         compositor: &mut C,
         proxy: Proxy<P::Message>,
@@ -175,7 +179,7 @@ where
     C: Compositor<Renderer = P::Renderer>,
     P::Theme: theme::Base,
 {
-    pub raw: Arc<winit::window::Window>,
+    pub raw: Arc<dyn winit::window::Window>,
     pub waker: shell::Waker,
     pub state: State<P>,
     pub exit_on_close_request: bool,
@@ -255,7 +259,7 @@ where
     pub fn update_mouse(&mut self, interaction: mouse::Interaction) {
         if interaction != self.mouse_interaction {
             if let Some(icon) = conversion::mouse_interaction(interaction) {
-                self.raw.set_cursor(icon);
+                self.raw.set_cursor(winit::cursor::Cursor::Icon(icon));
 
                 if self.mouse_interaction == mouse::Interaction::Hidden {
                     self.raw.set_cursor_visible(true);
@@ -279,17 +283,21 @@ where
         }
     }
 
-    fn enable_ime(&mut self, cursor: Rectangle, purpose: input_method::Purpose) {
-        if self.ime_state.is_none() {
-            self.raw.set_ime_allowed(true);
-        }
 
+    fn enable_ime(&mut self, cursor: Rectangle, purpose: input_method::Purpose) {
         if self.ime_state != Some((cursor, purpose)) {
-            self.raw.set_ime_cursor_area(
-                LogicalPosition::new(cursor.x, cursor.y),
-                LogicalSize::new(cursor.width, cursor.height),
-            );
-            self.raw.set_ime_purpose(conversion::ime_purpose(purpose));
+            self.raw.request_ime_update(ImeRequest::Disable).expect("Disable cannot fail");
+
+            let ime_caps = ImeCapabilities::new().with_cursor_area().with_hint_and_purpose();
+            //TODO: Set hint
+            let request_data = ImeRequestData::default()
+                .with_hint_and_purpose(ImeHint::NONE, conversion::ime_purpose(purpose))
+                .with_cursor_area(
+                    winit::dpi::Position::Logical(LogicalPosition::new(cursor.x as f64, cursor.y as f64)),
+                    winit::dpi::Size::Logical(LogicalSize::new(cursor.width as f64, cursor.height as f64)));
+
+            let enable_ime = ImeEnableRequest::new(ime_caps, request_data.clone()).unwrap();
+            self.raw.request_ime_update(ImeRequest::Enable(enable_ime)).expect("Enabling may fail if IME is not supported");
 
             self.ime_state = Some((cursor, purpose));
         }
@@ -297,7 +305,7 @@ where
 
     fn disable_ime(&mut self) {
         if self.ime_state.is_some() {
-            self.raw.set_ime_allowed(false);
+            self.raw.request_ime_update(ImeRequest::Disable).expect("Disable cannot fail");
             self.ime_state = None;
         }
 
