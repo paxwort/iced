@@ -517,6 +517,10 @@ pub fn mouse_button(mouse_button: winit::event::MouseButton) -> mouse::Button {
     }
 }
 
+/// Converts a `TabletToolButton` from [`winit`] to an [`iced`] mouse button.
+///
+/// [`winit`]: https://github.com/rust-windowing/winit
+/// [`iced`]: https://github.com/iced-rs/iced/tree/0.12
 pub fn tablet_tool_button(tablet_button: winit::event::TabletToolButton) -> mouse::Button {
     match tablet_button {
         winit::event::TabletToolButton::Contact => mouse::Button::Left,
