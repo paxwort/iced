@@ -37,6 +37,9 @@ pub use clipboard::Clipboard;
 pub use error::Error;
 pub use proxy::Proxy;
 use winit::event::StartCause;
+use winit::raw_window_handle::DisplayHandle;
+use winit::raw_window_handle::HasDisplayHandle;
+use winit::raw_window_handle::RawWindowHandle;
 use winit::window::Window;
 
 use crate::core::backend;
@@ -425,21 +428,8 @@ where
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let mut runner = runner;
-        let _ = event_loop.run_app(&mut runner);
-
-        runner.error.map(Err).unwrap_or(Ok(()))
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    {
-        use winit::platform::web::EventLoopExtWebSys;
-        let _ = event_loop.spawn_app(runner);
-
-        Ok(())
-    }
+    let _ = event_loop.run_app(runner);
+    Ok(())
 }
 
 #[derive(Debug)]
@@ -554,6 +544,7 @@ async fn run_instance<P>(
             break;
         };
 
+
         match event {
             Event::WindowCreated {
                 id,
@@ -562,23 +553,40 @@ async fn run_instance<P>(
                 make_visible,
                 on_open,
             } => {
+
+
+                // DANGER. TERRAIN. PULL UP. Blindly hacking around !Send !Sync in the display handle to make the compiler happy. I have no idea if it's even remotely safe to do this.
+                #[derive(Debug, Clone)]
+                struct DisplayHandleWrapper(winit::raw_window_handle::RawDisplayHandle);
+                #[allow(unsafe_code)]
+                unsafe impl Send for DisplayHandleWrapper{}
+                #[allow(unsafe_code)]
+                unsafe impl Sync for DisplayHandleWrapper{}
+                #[allow(unsafe_code)]
+                impl HasDisplayHandle for DisplayHandleWrapper{
+                    fn display_handle(&self) -> Result<DisplayHandle<'_>, winit::raw_window_handle::HandleError> {
+                        unsafe {Ok(DisplayHandle::borrow_raw(self.0))}
+                    }
+                }
                 if compositor.is_none() {
                     let (compositor_sender, compositor_receiver) = oneshot::channel();
 
                     let create_compositor = {
                         let window = window.clone();
                         let backend_settings = backend_settings.clone();
-                        let display_handle = display_handle.clone();
+                        let raw_display_handle = display_handle.display_handle().expect("").as_raw();
                         let proxy = proxy.clone();
                         let default_fonts = default_fonts.clone();
 
-                        async move {
-                            let shell = Shell::new(proxy.clone());
+                        let wrapper = DisplayHandleWrapper(raw_display_handle);
 
-                            let mut compositor =
+                        async move {
+                                let shell = Shell::new(proxy.clone());
+
+                                let mut compositor =
                                 <P::Renderer as compositor::Default>::Compositor::new(
                                     backend_settings,
-                                    display_handle,
+                                    wrapper,
                                     window,
                                     shell,
                                 )
@@ -605,6 +613,7 @@ async fn run_instance<P>(
                                     runtime::window::Action::GetLatest(sender),
                                 ));
                             }
+
                         }
                     };
 
@@ -1194,7 +1203,7 @@ async fn run_instance<P>(
                 }
             }
             Event::Exit => break,
-            _ => {}
+            Event::NewEvents(_) => {}
         }
     }
 
