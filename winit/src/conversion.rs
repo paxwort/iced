@@ -2,6 +2,11 @@
 //!
 //! [`winit`]: https://github.com/rust-windowing/winit
 //! [`iced_runtime`]: https://github.com/iced-rs/iced/tree/master/runtime
+use winit::dpi::PhysicalPosition;
+use winit::event::ButtonSource;
+use winit::event::FingerId;
+use winit::event::WindowEvent;
+
 use crate::core::input_method;
 use crate::core::keyboard;
 use crate::core::mouse;
@@ -163,22 +168,44 @@ pub fn window_event(
             })))
         }
         WindowEvent::CloseRequested => Some(Event::Window(window::Event::CloseRequested)),
-        WindowEvent::PointerMoved { position, .. } => {
-            let position = position.to_logical::<f64>(f64::from(scale_factor));
+        WindowEvent::PointerMoved { position, source, ..  } => {
+            let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
+            let position = Point::new(logical_position.x as f32, logical_position.y as f32);
 
-            Some(Event::Mouse(mouse::Event::CursorMoved {
-                position: Point::new(position.x as f32, position.y as f32),
-            }))
+            match source {
+                winit::event::PointerSource::Touch { finger_id, force } => {
+                    let id = touch::Finger(finger_id.into_raw() as u64);
+                    Some(Event::Touch(touch::Event::FingerMoved { id, position }))
+                },
+                _ => {Some(Event::Mouse(mouse::Event::CursorMoved {
+                    position,
+                }))}
+            }
+
         }
         WindowEvent::PointerEntered { .. } => Some(Event::Mouse(mouse::Event::CursorEntered)),
         WindowEvent::PointerLeft { .. } => Some(Event::Mouse(mouse::Event::CursorLeft)),
-        WindowEvent::PointerButton { button, state, .. } => {
 
+        WindowEvent::PointerButton { button: ButtonSource::Touch{ finger_id, ..}, state, position, .. } => {
+            let id = touch::Finger(finger_id.into_raw() as u64);
+            let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
+            let position = Point::new(logical_position.x as f32, logical_position.y as f32);
+            Some(Event::Touch(match state{
+                winit::event::ElementState::Pressed =>
+                    touch::Event::FingerPressed { id, position }
+                ,
+                winit::event::ElementState::Released =>
+                    touch::Event::FingerLifted { id, position }
+                ,
+            }))
+        }
+
+        WindowEvent::PointerButton { button, state, .. } => {
             let button: crate::mouse::Button = match button{
                 winit::event::ButtonSource::Mouse(button) => mouse_button(button),
-                winit::event::ButtonSource::Touch { finger_id, force } => todo!(),
                 winit::event::ButtonSource::TabletTool{button, ..} => tablet_tool_button(button),
-                winit::event::ButtonSource::Unknown(_) => todo!(),
+                winit::event::ButtonSource::Unknown(button) => mouse::Button::Other(button),
+                winit::event::ButtonSource::Touch { .. } => unreachable!("Touch handled previously"),
             };
 
             Some(Event::Mouse(match state {
@@ -186,6 +213,7 @@ pub fn window_event(
                 winit::event::ElementState::Released => mouse::Event::ButtonReleased(button),
             }))
         }
+
         WindowEvent::MouseWheel { delta, .. } => match delta {
             winit::event::MouseScrollDelta::LineDelta(delta_x, delta_y) => {
                 Some(Event::Mouse(mouse::Event::WheelScrolled {
@@ -309,7 +337,6 @@ pub fn window_event(
         }
         WindowEvent::DragMoved { .. } => {None},
         WindowEvent::DragLeft{..} => Some(Event::Window(window::Event::FilesHoveredLeft)),
-        //WindowEvent::Touch(touch) => Some(Event::Touch(touch_event(touch, scale_factor))),
         WindowEvent::Moved(position) => {
             let winit::dpi::LogicalPosition { x, y } = position.to_logical(f64::from(scale_factor));
 
@@ -551,26 +578,6 @@ pub fn cursor_position(position: winit::dpi::PhysicalPosition<f64>, scale_factor
 
     Point::new(logical_position.x, logical_position.y)
 }
-
-// /// Converts a `Touch` from [`winit`] to an [`iced`] touch event.
-// ///
-// /// [`winit`]: https://github.com/rust-windowing/winit
-// /// [`iced`]: https://github.com/iced-rs/iced/tree/0.12
-// pub fn touch_event(touch: winit::event::Touch, scale_factor: f32) -> touch::Event {
-//     let id = touch::Finger(touch.id);
-//     let position = {
-//         let location = touch.location.to_logical::<f64>(f64::from(scale_factor));
-
-//         Point::new(location.x as f32, location.y as f32)
-//     };
-
-//     match touch.phase {
-//         winit::event::TouchPhase::Started => touch::Event::FingerPressed { id, position },
-//         winit::event::TouchPhase::Moved => touch::Event::FingerMoved { id, position },
-//         winit::event::TouchPhase::Ended => touch::Event::FingerLifted { id, position },
-//         winit::event::TouchPhase::Cancelled => touch::Event::FingerLost { id, position },
-//     }
-// }
 
 /// Converts a `Key` from [`winit`] to an [`iced`] key.
 ///
