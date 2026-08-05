@@ -168,8 +168,8 @@ where
             WindowEvent::PointerMoved { position, .. } => {
                 self.cursor_position = Some(*position);
             }
-            WindowEvent::PointerLeft { .. } => {
-                self.cursor_position = None;
+            WindowEvent::PointerLeft { position, .. } => {
+                self.cursor_position = *position;
             }
             WindowEvent::ModifiersChanged(new_modifiers) => {
                 self.modifiers = new_modifiers.state();
