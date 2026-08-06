@@ -402,7 +402,7 @@ mod grid {
                 Event::Mouse(mouse_event) => match mouse_event {
                     mouse::Event::ButtonPressed(button) => {
                         let message = match button {
-                            mouse::Button::Left => {
+                            mouse::MouseButton::Left => {
                                 *interaction = if is_populated {
                                     Interaction::Erasing
                                 } else {
@@ -411,7 +411,7 @@ mod grid {
 
                                 populate.or(unpopulate)
                             }
-                            mouse::Button::Right => {
+                            mouse::MouseButton::Right => {
                                 *interaction = Interaction::Panning {
                                     translation: self.translation,
                                     start: cursor_position,

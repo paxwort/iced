@@ -283,7 +283,7 @@ where
         }
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
             | Event::Touch(touch::Event::FingerPressed { .. })
                 if self.on_press.is_some() =>
             {
@@ -297,7 +297,7 @@ where
                     shell.capture_event();
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
+            Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
             | Event::Touch(touch::Event::FingerLifted { .. }) => {
                 if let Some(on_press) = &self.on_press {
                     let state = tree.state.downcast_mut::<State>();
@@ -519,11 +519,11 @@ impl Default for Style {
 ///
 /// impl Catalog for MyTheme {
 ///     type Class<'a> = ButtonClass;
-///     
+///
 ///     fn default<'a>() -> Self::Class<'a> {
 ///         ButtonClass::default()
 ///     }
-///     
+///
 ///
 ///     fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
 ///         let mut style = Style::default();

@@ -499,7 +499,7 @@ where
         }
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
             | Event::Touch(touch::Event::FingerPressed { .. }) => {
                 let bounds = layout.bounds();
 
@@ -552,7 +552,7 @@ where
                     }
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
+            Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
             | Event::Touch(touch::Event::FingerLifted { .. })
             | Event::Touch(touch::Event::FingerLost { .. }) => {
                 if let Some((pane, origin)) = action.picked_pane()

@@ -611,7 +611,7 @@ where
                 }
             } else if mouse_over_y_scrollbar {
                 match event {
-                    Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+                    Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
                     | Event::Touch(touch::Event::FingerPressed { .. }) => {
                         let Some(cursor_position) = cursor.position() else {
                             return;
@@ -673,7 +673,7 @@ where
                 }
             } else if mouse_over_x_scrollbar {
                 match event {
-                    Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+                    Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
                     | Event::Touch(touch::Event::FingerPressed { .. }) => {
                         let Some(cursor_position) = cursor.position() else {
                             return;
@@ -760,7 +760,7 @@ where
 
             if matches!(
                 event,
-                Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
+                Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
                     | Event::Touch(
                         touch::Event::FingerLifted { .. } | touch::Event::FingerLost { .. }
                     )
@@ -813,7 +813,7 @@ where
                         shell.capture_event();
                     }
                 }
-                Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Middle))
+                Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Middle))
                     if self.auto_scroll && matches!(state.interaction, Interaction::None) =>
                 {
                     let Some(origin) = cursor_over_scrollable else {

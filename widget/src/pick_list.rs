@@ -440,7 +440,7 @@ where
         let state = tree.state.downcast_mut::<State<Renderer::Paragraph>>();
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
             | Event::Touch(touch::Event::FingerPressed { .. }) => {
                 if state.is_open {
                     // Event wasn't processed by overlay, so cursor was clicked either outside its

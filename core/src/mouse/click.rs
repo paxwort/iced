@@ -1,5 +1,5 @@
 //! Track mouse clicks.
-use crate::mouse::Button;
+use crate::mouse::MouseButton;
 use crate::time::Instant;
 use crate::{Point, Transformation};
 
@@ -9,7 +9,7 @@ use std::ops::Mul;
 #[derive(Debug, Clone, Copy)]
 pub struct Click {
     kind: Kind,
-    button: Button,
+    button: MouseButton,
     position: Point,
     time: Instant,
 }
@@ -40,7 +40,7 @@ impl Kind {
 impl Click {
     /// Creates a new [`Click`] with the given position and previous last
     /// [`Click`].
-    pub fn new(position: Point, button: Button, previous: Option<Click>) -> Click {
+    pub fn new(position: Point, button: MouseButton, previous: Option<Click>) -> Click {
         let time = Instant::now();
 
         let kind = if let Some(previous) = previous {

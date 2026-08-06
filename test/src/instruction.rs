@@ -282,21 +282,21 @@ pub enum Mouse {
     /// A button was pressed.
     Press {
         /// The button.
-        button: mouse::Button,
+        button: mouse::MouseButton,
         /// The location of the press.
         target: Option<Target>,
     },
     /// A button was released.
     Release {
         /// The button.
-        button: mouse::Button,
+        button: mouse::MouseButton,
         /// The location of the release.
         target: Option<Target>,
     },
     /// A button was clicked.
     Click {
         /// The button.
-        button: mouse::Button,
+        button: mouse::MouseButton,
         /// The location of the click.
         target: Option<Target>,
     },
@@ -400,7 +400,7 @@ impl From<Key> for keyboard::Key {
 mod format {
     use super::*;
 
-    pub fn button_at(button: mouse::Button, at: Option<&Target>) -> String {
+    pub fn button_at(button: mouse::MouseButton, at: Option<&Target>) -> String {
         let button = self::button(button);
 
         if let Some(at) = at {
@@ -414,14 +414,14 @@ mod format {
         }
     }
 
-    pub fn button(button: mouse::Button) -> &'static str {
+    pub fn button(button: mouse::MouseButton) -> &'static str {
         match button {
-            mouse::Button::Left => "",
-            mouse::Button::Right => "right",
-            mouse::Button::Middle => "middle",
-            mouse::Button::Back => "back",
-            mouse::Button::Forward => "forward",
-            mouse::Button::Other(_) => "other",
+            mouse::MouseButton::Left => "",
+            mouse::MouseButton::Right => "right",
+            mouse::MouseButton::Middle => "middle",
+            mouse::MouseButton::Back => "back",
+            mouse::MouseButton::Forward => "forward",
+            mouse::MouseButton::Other(_) => "other",
         }
     }
 
@@ -538,7 +538,7 @@ mod parser {
         Ok((input, Mouse::Release { button, target }))
     }
 
-    fn mouse_button_at(input: &str) -> IResult<&str, (mouse::Button, Option<Target>)> {
+    fn mouse_button_at(input: &str) -> IResult<&str, (mouse::MouseButton, Option<Target>)> {
         let (input, button) = mouse_button(input)?;
         let (input, at) = opt(target).parse(input)?;
 
@@ -554,10 +554,10 @@ mod parser {
         .parse(input)
     }
 
-    fn mouse_button(input: &str) -> IResult<&str, mouse::Button> {
+    fn mouse_button(input: &str) -> IResult<&str, mouse::MouseButton> {
         alt((
-            tag("right").map(|_| mouse::Button::Right),
-            success(mouse::Button::Left),
+            tag("right").map(|_| mouse::MouseButton::Right),
+            success(mouse::MouseButton::Left),
         ))
         .parse(input)
     }

@@ -328,7 +328,7 @@ where
             };
 
             match &event {
-                Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+                Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
                 | Event::Touch(touch::Event::FingerPressed { .. }) => {
                     if let Some(cursor_position) = cursor.position_over(layout.bounds()) {
                         if state.keyboard_modifiers.command() {
@@ -342,7 +342,7 @@ where
                         shell.capture_event();
                     }
                 }
-                Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
+                Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
                 | Event::Touch(touch::Event::FingerLifted { .. })
                 | Event::Touch(touch::Event::FingerLost { .. })
                     if state.is_dragging =>

@@ -512,7 +512,7 @@ impl<P: Program + 'static> Tester<P> {
                 };
 
                 let instruction::Interaction::Mouse(instruction::Mouse::Click {
-                    button: mouse::Button::Left,
+                    button: mouse::MouseButton::Left,
                     target: Some(instruction::Target::Text(text)),
                 }) = interaction
                 else {

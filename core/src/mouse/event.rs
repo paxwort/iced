@@ -1,6 +1,6 @@
-use crate::Point;
+use crate::{Point, mouse::button::ButtonSource};
 
-use super::Button;
+use super::MouseButton;
 
 /// A mouse event.
 ///
@@ -23,10 +23,20 @@ pub enum Event {
     },
 
     /// A mouse button was pressed.
-    ButtonPressed(Button),
+    ButtonPressed{
+        ///The pointer type on which the button was pressed
+        button: ButtonSource,
+        /// The position at which the button was pressed
+        position: Point
+    },
 
     /// A mouse button was released.
-    ButtonReleased(Button),
+    ButtonReleased{
+        ///The pointer type on which the button was released
+        button: ButtonSource,
+        /// The position at which the button was pressed
+        position: Point
+    },
 
     /// The mouse wheel was scrolled.
     WheelScrolled {

@@ -5,8 +5,10 @@ mod button;
 mod cursor;
 mod event;
 mod interaction;
+mod tablet_tool;
 
-pub use button::Button;
+pub use tablet_tool::*;
+pub use button::{MouseButton, ButtonSource};
 pub use click::Click;
 pub use cursor::Cursor;
 pub use event::{Event, ScrollDelta};
