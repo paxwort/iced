@@ -78,11 +78,11 @@ where
                 let is_over = cursor
                     .position()
                     .zip(nested_layout)
-                    .and_then(|(cursor_position, nested_layout)| {
+                    .and_then(|(position, nested_layout)| {
                         overlay.overlay(layout, renderer).map(|nested| {
                             nested.as_overlay().mouse_interaction(
                                 nested_layout.children().next().unwrap(),
-                                mouse::Cursor::Available(cursor_position),
+                                mouse::Cursor::Available{position, source: cursor.source()},
                                 renderer,
                             ) != mouse::Interaction::None
                         })
@@ -184,10 +184,10 @@ where
                     let is_over = nested_is_over
                         || cursor
                             .position()
-                            .map(|cursor_position| {
+                            .map(|position| {
                                 overlay.mouse_interaction(
                                     layout,
-                                    mouse::Cursor::Available(cursor_position),
+                                    mouse::Cursor::Available{position, source: cursor.source()},
                                     renderer,
                                 ) != mouse::Interaction::None
                             })

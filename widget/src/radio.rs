@@ -328,8 +328,7 @@ where
         _viewport: &Rectangle,
     ) {
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerPressed { .. })
+            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!()))
                 if cursor.is_over(layout.bounds()) =>
             {
                 shell.publish(self.on_click.clone());

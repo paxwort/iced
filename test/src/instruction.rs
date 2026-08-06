@@ -50,11 +50,11 @@ impl Interaction {
         Some(match event {
             Event::Mouse(mouse) => Self::Mouse(match mouse {
                 mouse::Event::CursorMoved { position } => Mouse::Move(Target::Point(*position)),
-                mouse::Event::ButtonPressed(button) => Mouse::Press {
+                mouse::Event::ButtonPressed(mouse::ButtonSource::Mouse(button)) => Mouse::Press {
                     button: *button,
                     target: None,
                 },
-                mouse::Event::ButtonReleased(button) => Mouse::Release {
+                mouse::Event::ButtonReleased(mouse::ButtonSource::Mouse(button)) => Mouse::Release {
                     button: *button,
                     target: None,
                 },
@@ -205,9 +205,9 @@ impl Interaction {
     pub fn events(&self, find_target: impl FnOnce(&Target) -> Option<Point>) -> Option<Vec<Event>> {
         let mouse_move_ = |to| Event::Mouse(mouse::Event::CursorMoved { position: to });
 
-        let mouse_press = |button| Event::Mouse(mouse::Event::ButtonPressed(button));
+        let mouse_press = |button| Event::Mouse(mouse::Event::ButtonPressed(mouse::ButtonSource::Mouse(button)));
 
-        let mouse_release = |button| Event::Mouse(mouse::Event::ButtonReleased(button));
+        let mouse_release = |button| Event::Mouse(mouse::Event::ButtonReleased(mouse::ButtonSource::Mouse(button)));
 
         let key_press = |key| simulator::press_key(key, None);
 
@@ -282,21 +282,21 @@ pub enum Mouse {
     /// A button was pressed.
     Press {
         /// The button.
-        button: mouse::MouseButton,
+        button: mouse::Button,
         /// The location of the press.
         target: Option<Target>,
     },
     /// A button was released.
     Release {
         /// The button.
-        button: mouse::MouseButton,
+        button: mouse::Button,
         /// The location of the release.
         target: Option<Target>,
     },
     /// A button was clicked.
     Click {
         /// The button.
-        button: mouse::MouseButton,
+        button: mouse::Button,
         /// The location of the click.
         target: Option<Target>,
     },
@@ -400,7 +400,7 @@ impl From<Key> for keyboard::Key {
 mod format {
     use super::*;
 
-    pub fn button_at(button: mouse::MouseButton, at: Option<&Target>) -> String {
+    pub fn button_at(button: mouse::Button, at: Option<&Target>) -> String {
         let button = self::button(button);
 
         if let Some(at) = at {
@@ -414,14 +414,14 @@ mod format {
         }
     }
 
-    pub fn button(button: mouse::MouseButton) -> &'static str {
+    pub fn button(button: mouse::Button) -> &'static str {
         match button {
-            mouse::MouseButton::Left => "",
-            mouse::MouseButton::Right => "right",
-            mouse::MouseButton::Middle => "middle",
-            mouse::MouseButton::Back => "back",
-            mouse::MouseButton::Forward => "forward",
-            mouse::MouseButton::Other(_) => "other",
+            mouse::Button::Left => "",
+            mouse::Button::Right => "right",
+            mouse::Button::Middle => "middle",
+            mouse::Button::Back => "back",
+            mouse::Button::Forward => "forward",
+            mouse::Button::Other(_) => "other",
         }
     }
 
@@ -467,6 +467,7 @@ impl fmt::Display for Expectation {
     }
 }
 
+use iced_futures::core::mouse::Button;
 pub use parser::Error as ParseError;
 
 mod parser {
@@ -538,7 +539,7 @@ mod parser {
         Ok((input, Mouse::Release { button, target }))
     }
 
-    fn mouse_button_at(input: &str) -> IResult<&str, (mouse::MouseButton, Option<Target>)> {
+    fn mouse_button_at(input: &str) -> IResult<&str, (mouse::Button, Option<Target>)> {
         let (input, button) = mouse_button(input)?;
         let (input, at) = opt(target).parse(input)?;
 
@@ -554,10 +555,10 @@ mod parser {
         .parse(input)
     }
 
-    fn mouse_button(input: &str) -> IResult<&str, mouse::MouseButton> {
+    fn mouse_button(input: &str) -> IResult<&str, mouse::Button> {
         alt((
-            tag("right").map(|_| mouse::MouseButton::Right),
-            success(mouse::MouseButton::Left),
+            tag("right").map(|_| mouse::Button::Right),
+            success(mouse::Button::Left),
         ))
         .parse(input)
     }

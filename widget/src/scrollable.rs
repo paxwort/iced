@@ -39,6 +39,7 @@ use crate::core::{
     Rectangle, Shadow, Shell, Size, Theme, Vector, Widget,
 };
 
+use iced_runtime::core::button_primary;
 pub use operation::scrollable::{AbsoluteOffset, RelativeOffset};
 
 /// A widget that can vertically display an infinite amount of content with a
@@ -611,8 +612,7 @@ where
                 }
             } else if mouse_over_y_scrollbar {
                 match event {
-                    Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
-                    | Event::Touch(touch::Event::FingerPressed { .. }) => {
+                    Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
                         let Some(cursor_position) = cursor.position() else {
                             return;
                         };
@@ -673,8 +673,7 @@ where
                 }
             } else if mouse_over_x_scrollbar {
                 match event {
-                    Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
-                    | Event::Touch(touch::Event::FingerPressed { .. }) => {
+                    Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
                         let Some(cursor_position) = cursor.position() else {
                             return;
                         };
@@ -730,7 +729,8 @@ where
                     Some(cursor_position)
                         if !(mouse_over_x_scrollbar || mouse_over_y_scrollbar) =>
                     {
-                        mouse::Cursor::Available(cursor_position + translation)
+                        mouse::Cursor::Available{position: cursor_position + translation, source: cursor.source()}
+
                     }
                     _ => cursor.levitate() + translation,
                 };
@@ -760,10 +760,7 @@ where
 
             if matches!(
                 event,
-                Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
-                    | Event::Touch(
-                        touch::Event::FingerLifted { .. } | touch::Event::FingerLost { .. }
-                    )
+                Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!()))
             ) {
                 state.interaction = Interaction::None;
                 return;
@@ -813,7 +810,7 @@ where
                         shell.capture_event();
                     }
                 }
-                Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Middle))
+                Event::Mouse(mouse::Event::ButtonPressed(mouse::ButtonSource::Mouse(mouse::Button::Middle)))
                     if self.auto_scroll && matches!(state.interaction, Interaction::None) =>
                 {
                     let Some(origin) = cursor_over_scrollable else {
@@ -1043,7 +1040,7 @@ where
 
         let cursor = match cursor_over_scrollable {
             Some(cursor_position) if !(mouse_over_x_scrollbar || mouse_over_y_scrollbar) => {
-                mouse::Cursor::Available(cursor_position + translation)
+                mouse::Cursor::Available{position: cursor_position + translation, source: cursor.source()}
             }
             _ => cursor.levitate() + translation,
         };
@@ -1201,7 +1198,7 @@ where
 
         let cursor = match cursor_over_scrollable {
             Some(cursor_position) if !(mouse_over_x_scrollbar || mouse_over_y_scrollbar) => {
-                mouse::Cursor::Available(cursor_position + translation)
+                mouse::Cursor::Available{position: cursor_position + translation, source: cursor.source()}
             }
             _ => cursor.levitate() + translation,
         };

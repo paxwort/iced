@@ -122,7 +122,7 @@ where
     ///
     /// This does _not_ produce mouse movement events!
     pub fn point_at(&mut self, position: impl Into<Point>) {
-        self.cursor = mouse::Cursor::Available(position.into());
+        self.cursor = mouse::Cursor::Available{position: position.into(), source: None};
     }
 
     /// Clicks the [`Bounded`] target found by the given [`Selector`], if any.
@@ -341,8 +341,8 @@ where
 /// Returns the sequence of events of a click.
 pub fn click() -> impl Iterator<Item = Event> {
     [
-        Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left)),
-        Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left)),
+        Event::Mouse(mouse::Event::ButtonPressed(mouse::ButtonSource::Mouse(mouse::Button::Left))),
+        Event::Mouse(mouse::Event::ButtonReleased(mouse::ButtonSource::Mouse(mouse::Button::Left))),
     ]
     .into_iter()
 }

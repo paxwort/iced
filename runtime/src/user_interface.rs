@@ -282,10 +282,10 @@ where
             let (base_cursor, interaction) = if let Some(overlay) = maybe_overlay.as_mut() {
                 let interaction = cursor
                     .position()
-                    .map(|cursor_position| {
+                    .map(|position| {
                         overlay.mouse_interaction(
                             Layout::new(&layout),
-                            mouse::Cursor::Available(cursor_position),
+                            mouse::Cursor::Available{position, source: cursor.source()},
                             renderer,
                         )
                     })

@@ -400,9 +400,9 @@ mod grid {
                     )
                 }
                 Event::Mouse(mouse_event) => match mouse_event {
-                    mouse::Event::ButtonPressed(button) => {
-                        let message = match button {
-                            mouse::MouseButton::Left => {
+                    mouse::Event::ButtonPressed(button_source) => {
+                        let message = match button_source {
+                            mouse::button_primary!() => {
                                 *interaction = if is_populated {
                                     Interaction::Erasing
                                 } else {
@@ -411,7 +411,7 @@ mod grid {
 
                                 populate.or(unpopulate)
                             }
-                            mouse::MouseButton::Right => {
+                            mouse::button_secondary!() => {
                                 *interaction = Interaction::Panning {
                                     translation: self.translation,
                                     start: cursor_position,

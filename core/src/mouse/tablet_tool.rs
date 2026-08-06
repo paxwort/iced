@@ -34,14 +34,10 @@
         pub angle: Option<TabletToolAngle>,
     }
 
-    #[allow(missing_docs)]
-    #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
-    pub struct TabletToolTilt {
-        pub x: i8,
-        pub y: i8,
-    }
 
     #[allow(missing_docs)]
+    /// The polar orientation of the tablet tool in relation to the tablet surface.
+    /// Used by UIKit.
     #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct TabletToolAngle {
         pub altitude: f64,
@@ -49,9 +45,21 @@
     }
 
     #[allow(missing_docs)]
-    // Device-calibrated force because Apple couldn't stand the idea of user calibration I guess?
+    /// The cartesian orientation of the tablet tool in relation to the tablet surface.
+    /// Used by everything else
+    #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+    pub struct TabletToolTilt {
+        pub x: i8,
+        pub y: i8,
+    }
+
+    #[allow(missing_docs)]
+    /// The force applied with the tablet tool
     #[derive(Debug, Clone, Copy, PartialEq)]
     pub enum Force {
+        /// Calibrated force, used by UIKit.
+        /// Do apple engineers get beaten if they implement something too close to existing solutions?
         Calibrated { force: f64, max_possible_force: f64 },
+        /// Normalized force, used by everything else.
         Normalized(f64),
     }

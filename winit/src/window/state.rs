@@ -110,9 +110,11 @@ where
     pub fn cursor(&self) -> mouse::Cursor {
         self.cursor_position
             .map(|cursor_position| {
-                conversion::cursor_position(cursor_position, self.viewport.scale_factor())
+                mouse::Cursor::Available{
+                    position: conversion::cursor_position(cursor_position, self.viewport.scale_factor()),
+                    source: None
+                }
             })
-            .map(mouse::Cursor::Available)
             .unwrap_or(mouse::Cursor::Unavailable)
     }
 

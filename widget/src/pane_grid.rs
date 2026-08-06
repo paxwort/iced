@@ -72,6 +72,8 @@ pub use content::Content;
 pub use controls::Controls;
 pub use direction::Direction;
 pub use draggable::Draggable;
+use iced_runtime::core::mouse::ButtonSource;
+use iced_runtime::core::mouse::TouchButton;
 pub use node::Node;
 pub use pane::Pane;
 pub use split::Split;
@@ -499,8 +501,7 @@ where
         }
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerPressed { .. }) => {
+            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
                 let bounds = layout.bounds();
 
                 if let Some(cursor_position) = cursor.position_over(bounds) {
@@ -552,9 +553,7 @@ where
                     }
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerLifted { .. })
-            | Event::Touch(touch::Event::FingerLost { .. }) => {
+            Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!())) => {
                 if let Some((pane, origin)) = action.picked_pane()
                     && let Some(on_drag) = on_drag
                     && let Some(cursor_position) = cursor.position()

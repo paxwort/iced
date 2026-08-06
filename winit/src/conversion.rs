@@ -208,16 +208,12 @@ pub fn window_event(
 
             let button: crate::mouse::ButtonSource = match button {
                 winit::event::ButtonSource::Mouse(button) => {
-                    mouse::ButtonSource::Mouse{button: mouse_button(button)}
+                    mouse::ButtonSource::Mouse(mouse_button(button))
                 }
                 winit::event::ButtonSource::TabletTool { kind, button, data } => {
-                    mouse::ButtonSource::TabletTool{
-                        kind: tablet_tool_kind(kind),
-                        button: tablet_tool_button(button),
-                        data: tablet_tool_data(data)}
-                }
+                    mouse::ButtonSource::TabletTool(tablet_tool_button(button))}
                 winit::event::ButtonSource::Unknown(button) => {
-                    mouse::ButtonSource::Mouse{button: mouse::MouseButton::Other(button)}
+                    mouse::ButtonSource::Mouse(mouse::Button::Other(button))
                 }
                 winit::event::ButtonSource::Touch { .. } => {
                     unreachable!("Touch handled previously")
@@ -226,10 +222,10 @@ pub fn window_event(
 
             Some(Event::Mouse(match state {
                 winit::event::ElementState::Pressed => {
-                    mouse::Event::ButtonPressed { button, position }
+                    mouse::Event::ButtonPressed (button)
                 }
                 winit::event::ElementState::Released => {
-                    mouse::Event::ButtonReleased { button, position }
+                    mouse::Event::ButtonReleased (button)
                 }
             }))
         }
@@ -607,14 +603,14 @@ pub fn tablet_tool_data(data: winit::event::TabletToolData) -> mouse::TabletTool
 /// [`winit`]: https://github.com/rust-windowing/winit
 /// [`iced`]: https://github.com/iced-rs/iced/tree/0.12
 ///
-pub fn mouse_button(mouse_button: winit::event::MouseButton) -> mouse::MouseButton {
+pub fn mouse_button(mouse_button: winit::event::MouseButton) -> mouse::Button {
     match mouse_button {
-        winit::event::MouseButton::Left => mouse::MouseButton::Left,
-        winit::event::MouseButton::Right => mouse::MouseButton::Right,
-        winit::event::MouseButton::Middle => mouse::MouseButton::Middle,
-        winit::event::MouseButton::Back => mouse::MouseButton::Back,
-        winit::event::MouseButton::Forward => mouse::MouseButton::Forward,
-        other => mouse::MouseButton::Other(other as u16),
+        winit::event::MouseButton::Left => mouse::Button::Left,
+        winit::event::MouseButton::Right => mouse::Button::Right,
+        winit::event::MouseButton::Middle => mouse::Button::Middle,
+        winit::event::MouseButton::Back => mouse::Button::Back,
+        winit::event::MouseButton::Forward => mouse::Button::Forward,
+        other => mouse::Button::Other(other as u16),
     }
 }
 

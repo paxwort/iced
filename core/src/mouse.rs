@@ -8,7 +8,7 @@ mod interaction;
 mod tablet_tool;
 
 pub use tablet_tool::*;
-pub use button::{MouseButton, ButtonSource};
+pub use button::*;
 pub use click::Click;
 pub use cursor::Cursor;
 pub use event::{Event, ScrollDelta};

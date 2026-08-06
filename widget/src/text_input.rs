@@ -664,8 +664,7 @@ where
         };
 
         match &event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerPressed { .. }) => {
+            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
                 let state = state::<Renderer>(tree);
                 let cursor_before = state.cursor;
 
@@ -699,7 +698,7 @@ where
                     };
 
                     let click =
-                        mouse::Click::new(cursor_position, mouse::MouseButton::Left, state.last_click);
+                        mouse::Click::new(cursor_position, mouse::Button::Left, state.last_click);
 
                     match click.kind() {
                         click::Kind::Single => {
@@ -763,9 +762,7 @@ where
                     shell.capture_event();
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerLifted { .. })
-            | Event::Touch(touch::Event::FingerLost { .. }) => {
+            Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!())) => {
                 state::<Renderer>(tree).is_dragging = None;
             }
             Event::Mouse(mouse::Event::CursorMoved { position })

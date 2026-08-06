@@ -325,8 +325,7 @@ where
         };
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerPressed { .. }) => {
+            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
                 let mouse_over = cursor.is_over(layout.bounds());
 
                 if mouse_over {

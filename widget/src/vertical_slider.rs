@@ -30,6 +30,8 @@
 //! ```
 use std::ops::RangeInclusive;
 
+use iced_runtime::core::button_primary;
+
 pub use crate::slider::{Catalog, Handle, HandleShape, Status, Style, StyleFn, default};
 
 use crate::core::border::Border;
@@ -331,8 +333,7 @@ where
         };
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerPressed { .. }) => {
+            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
                 if let Some(cursor_position) = cursor.position_over(layout.bounds()) {
                     if state.keyboard_modifiers.control() || state.keyboard_modifiers.command() {
                         let _ = self.default.map(change);
@@ -345,9 +346,7 @@ where
                     shell.capture_event();
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left))
-            | Event::Touch(touch::Event::FingerLifted { .. })
-            | Event::Touch(touch::Event::FingerLost { .. })
+            Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!()))
                 if is_dragging =>
             {
                 if let Some(on_release) = self.on_release.clone() {

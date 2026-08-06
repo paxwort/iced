@@ -1,4 +1,7 @@
 //! Zoom and pan on an image.
+use iced_runtime::core::button_primary;
+use iced_runtime::core::mouse::Button;
+
 use crate::core::border;
 use crate::core::image::{self, FilterMethod};
 use crate::core::layout;
@@ -214,7 +217,7 @@ where
                 shell.request_redraw();
                 shell.capture_event();
             }
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::MouseButton::Left)) => {
+            Event::Mouse(mouse::Event::ButtonPressed(button_primary!())) => {
                 let Some(cursor_position) = cursor.position_over(bounds) else {
                     return;
                 };
@@ -226,7 +229,7 @@ where
 
                 shell.capture_event();
             }
-            Event::Mouse(mouse::Event::ButtonReleased(mouse::MouseButton::Left)) => {
+            Event::Mouse(mouse::Event::ButtonReleased(button_primary!())) => {
                 let state = tree.state.downcast_mut::<State>();
 
                 state.cursor_grabbed_at = None;
