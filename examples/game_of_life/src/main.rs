@@ -365,7 +365,7 @@ mod grid {
             bounds: Rectangle,
             cursor: mouse::Cursor,
         ) -> Option<canvas::Action<Message>> {
-            if let Event::Mouse(mouse::Event::ButtonReleased(_)) = event {
+            if let Event::Mouse(mouse::Event::ButtonReleased{ .. }) = event {
                 *interaction = Interaction::None;
             }
 
@@ -400,8 +400,8 @@ mod grid {
                     )
                 }
                 Event::Mouse(mouse_event) => match mouse_event {
-                    mouse::Event::ButtonPressed(button_source) => {
-                        let message = match button_source {
+                    mouse::Event::ButtonPressed{button, ..} => {
+                        let message = match button {
                             mouse::button_primary!() => {
                                 *interaction = if is_populated {
                                     Interaction::Erasing
@@ -429,6 +429,7 @@ mod grid {
                                 .and_capture(),
                         )
                     }
+
                     mouse::Event::CursorMoved { .. } => {
                         let message = match *interaction {
                             Interaction::Drawing => populate,

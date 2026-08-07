@@ -54,6 +54,8 @@
 //!     }
 //! }
 //! ```
+use iced_runtime::core::Point;
+
 use crate::core::keyboard;
 use crate::core::keyboard::key;
 use crate::core::layout::{self, Layout};
@@ -717,7 +719,7 @@ where
                 let mut local_shell = shell.local(&mut local_messages);
                 self.text_input.update(
                     &mut tree.children[0],
-                    &Event::Mouse(mouse::Event::ButtonPressed(mouse::ButtonSource::Mouse(mouse::Button::Left))),
+                    &Event::Mouse(mouse::Event::ButtonPressed{button: mouse::ButtonSource::Mouse(mouse::Button::Left), position: Point::ORIGIN}),
                     layout,
                     mouse::Cursor::Unavailable,
                     renderer,

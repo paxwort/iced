@@ -328,7 +328,7 @@ where
             };
 
             match &event {
-                Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!()))=> {
+                Event::Mouse(crate::core::pressed_primary!())=> {
                     if let Some(cursor_position) = cursor.position_over(layout.bounds()) {
                         if state.keyboard_modifiers.command() {
                             let _ = self.default.map(change);
@@ -341,7 +341,7 @@ where
                         shell.capture_event();
                     }
                 }
-                Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!()))
+                Event::Mouse(crate::core::released_primary!())
                     if state.is_dragging =>
                 {
                     if let Some(on_release) = self.on_release.clone() {

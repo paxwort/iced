@@ -664,7 +664,7 @@ where
         };
 
         match &event {
-            Event::Mouse(mouse::Event::ButtonPressed(btn_src @ crate::core::button_primary!())) => {
+            Event::Mouse(mouse::pressed_primary!(button, _position)) => {
                 let state = state::<Renderer>(tree);
                 let cursor_before = state.cursor;
 
@@ -698,7 +698,7 @@ where
                     };
 
                     let click =
-                        mouse::Click::new(cursor_position, *btn_src, state.last_click);
+                        mouse::Click::new(cursor_position, *button, state.last_click);
 
                     match click.kind() {
                         click::Kind::Single => {
@@ -762,7 +762,7 @@ where
                     shell.capture_event();
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!())) => {
+            Event::Mouse(crate::core::released_primary!()) => {
                 state::<Renderer>(tree).is_dragging = None;
             }
             Event::Mouse(mouse::Event::CursorMoved { position })

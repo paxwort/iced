@@ -283,7 +283,7 @@ where
         }
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!()))
+            Event::Mouse(crate::core::pressed_primary!())
             | Event::Touch(touch::Event::FingerPressed { .. })
                 if self.on_press.is_some() =>
             {
@@ -297,7 +297,7 @@ where
                     shell.capture_event();
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!()))
+            Event::Mouse(crate::core::released_primary!())
             | Event::Touch(touch::Event::FingerLifted { .. }) => {
                 if let Some(on_press) = &self.on_press {
                     let state = tree.state.downcast_mut::<State>();

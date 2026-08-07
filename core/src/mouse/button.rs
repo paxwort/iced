@@ -6,8 +6,12 @@ use super::tablet_tool::{TabletToolButton, TabletToolData, TabletToolKind};
 pub enum ButtonSource {
     /// The mouse
     Mouse( Button ),
+    #[allow(missing_docs)]
     /// A tablet tool, such as a pen
-    TabletTool ( TabletToolButton ),
+    TabletTool {
+        button: TabletToolButton,
+        kind: TabletToolKind,
+        data: TabletToolData },
     /// "Button" sources from other touch events
     Touch (TouchButton),
 }
@@ -18,7 +22,7 @@ pub enum ButtonSource {
 macro_rules! button_primary{
     () => {
         $crate::mouse::ButtonSource::Mouse($crate::mouse::Button::Left)
-        | $crate::mouse::ButtonSource::TabletTool($crate::mouse::TabletToolButton::Contact)
+        | $crate::mouse::ButtonSource::TabletTool{ button: $crate::mouse::TabletToolButton::Contact, .. }
         | $crate::mouse::ButtonSource::Touch($crate::mouse::TouchButton::Primary(_))
     };
 }
@@ -28,7 +32,7 @@ macro_rules! button_primary{
 macro_rules! button_secondary{
     () => {
         $crate::mouse::ButtonSource::Mouse($crate::mouse::Button::Right)
-        | $crate::mouse::ButtonSource::TabletTool($crate::mouse::TabletToolButton::Barrel)
+        | $crate::mouse::ButtonSource::TabletTool{ button: $crate::mouse::TabletToolButton::Barrel,..}
     };
 }
 

@@ -501,7 +501,7 @@ where
         }
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
+            Event::Mouse(crate::core::pressed_primary!()) => {
                 let bounds = layout.bounds();
 
                 if let Some(cursor_position) = cursor.position_over(bounds) {
@@ -553,7 +553,7 @@ where
                     }
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!())) => {
+            Event::Mouse(crate::core::released_primary!()) => {
                 if let Some((pane, origin)) = action.picked_pane()
                     && let Some(on_drag) = on_drag
                     && let Some(cursor_position) = cursor.position()

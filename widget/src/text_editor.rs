@@ -1205,14 +1205,14 @@ impl<Message> Update<Message> {
 
         match event {
             Event::Mouse(event) => match event {
-                mouse::Event::ButtonPressed(btn_src @ crate::core::button_primary!()) => {
+                mouse::pressed_primary!(button, _position) => {
                     if let Some(cursor_position) = cursor.position_in(bounds) {
                         let cursor_position =
                             cursor_position - Vector::new(padding.left, padding.top);
 
                         let click = mouse::Click::new(
                             cursor_position,
-                            *btn_src,
+                            *button,
                             state.last_click,
                         );
 
@@ -1223,7 +1223,7 @@ impl<Message> Update<Message> {
                         None
                     }
                 }
-                mouse::Event::ButtonReleased(crate::core::button_primary!()) => Some(Update::Release),
+                crate::core::released_primary!() => Some(Update::Release),
                 mouse::Event::CursorMoved { .. } => match state.drag_click {
                     Some(mouse::click::Kind::Single) => {
                         let cursor_position =

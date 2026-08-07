@@ -348,17 +348,16 @@ fn update<Message: Clone, Theme, Renderer>(
     }
 
     match event {
-        Event::Mouse(mouse::Event::ButtonPressed(btnsrc @ crate::core::button_primary!())) => {
+        Event::Mouse(crate::core::pressed_primary!(button, position)) => {
             if let Some(message) = widget.on_press.as_ref() {
                 shell.publish(message.clone());
                 shell.capture_event();
             }
 
-            if let Some(position) = cursor_position
-                && let Some(message) = widget.on_double_click.as_ref()
+            if let Some(message) = widget.on_double_click.as_ref()
             {
                 let new_click =
-                    mouse::Click::new(position, *btnsrc, state.previous_click);
+                    mouse::Click::new(*position, *button, state.previous_click);
 
                 if new_click.kind() == mouse::click::Kind::Double {
                     shell.publish(message.clone());
@@ -371,29 +370,29 @@ fn update<Message: Clone, Theme, Renderer>(
                 shell.capture_event();
             }
         }
-        Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!())) => {
+        Event::Mouse(crate::core::released_primary!()) => {
             if let Some(message) = widget.on_release.as_ref() {
                 shell.publish(message.clone());
             }
         }
-        Event::Mouse(mouse::Event::ButtonPressed(button_secondary!())) => {
+        Event::Mouse(crate::core::pressed_secondary!()) => {
             if let Some(message) = widget.on_right_press.as_ref() {
                 shell.publish(message.clone());
                 shell.capture_event();
             }
         }
-        Event::Mouse(mouse::Event::ButtonReleased(button_secondary!())) => {
+        Event::Mouse(crate::core::released_secondary!()) => {
             if let Some(message) = widget.on_right_release.as_ref() {
                 shell.publish(message.clone());
             }
         }
-        Event::Mouse(mouse::Event::ButtonPressed(button_auxiliary!())) => {
+        Event::Mouse(crate::core::pressed_auxiliary!()) => {
             if let Some(message) = widget.on_middle_press.as_ref() {
                 shell.publish(message.clone());
                 shell.capture_event();
             }
         }
-        Event::Mouse(mouse::Event::ButtonReleased(button_auxiliary!())) => {
+        Event::Mouse(crate::core::released_auxiliary!()) => {
             if let Some(message) = widget.on_middle_release.as_ref() {
                 shell.publish(message.clone());
             }

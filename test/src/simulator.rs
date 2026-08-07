@@ -341,8 +341,8 @@ where
 /// Returns the sequence of events of a click.
 pub fn click() -> impl Iterator<Item = Event> {
     [
-        Event::Mouse(mouse::Event::ButtonPressed(mouse::ButtonSource::Mouse(mouse::Button::Left))),
-        Event::Mouse(mouse::Event::ButtonReleased(mouse::ButtonSource::Mouse(mouse::Button::Left))),
+        Event::Mouse(mouse::Event::ButtonPressed{button: mouse::ButtonSource::Mouse(mouse::Button::Left), position: Point::ORIGIN}),
+            Event::Mouse(mouse::Event::ButtonReleased{button: mouse::ButtonSource::Mouse(mouse::Button::Left), position: Point::ORIGIN}),
     ]
     .into_iter()
 }

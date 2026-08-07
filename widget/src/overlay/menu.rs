@@ -405,7 +405,7 @@ where
         _viewport: &Rectangle,
     ) {
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
+            Event::Mouse(crate::core::pressed_primary!()) => {
                 if cursor.is_over(layout.bounds())
                     && let Some(index) = *self.hovered_option
                     && let Some(option) = self.options.get(index)

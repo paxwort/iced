@@ -566,8 +566,8 @@ where
         if let Some(last_scrolled) = state.last_scrolled {
             let clear_transaction = match event {
                 Event::Mouse(
-                    mouse::Event::ButtonPressed(_)
-                    | mouse::Event::ButtonReleased(_)
+                    mouse::Event::ButtonPressed{ .. }
+                    | mouse::Event::ButtonReleased{ .. }
                     | mouse::Event::CursorLeft,
                 ) => true,
                 Event::Mouse(mouse::Event::CursorMoved { .. }) => {
@@ -612,7 +612,7 @@ where
                 }
             } else if mouse_over_y_scrollbar {
                 match event {
-                    Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
+                    Event::Mouse(crate::core::pressed_primary!()) => {
                         let Some(cursor_position) = cursor.position() else {
                             return;
                         };
@@ -673,7 +673,7 @@ where
                 }
             } else if mouse_over_x_scrollbar {
                 match event {
-                    Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
+                    Event::Mouse(crate::core::pressed_primary!()) => {
                         let Some(cursor_position) = cursor.position() else {
                             return;
                         };
@@ -708,7 +708,7 @@ where
                 && matches!(
                     event,
                     Event::Mouse(
-                        mouse::Event::ButtonPressed(_) | mouse::Event::WheelScrolled { .. }
+                        mouse::Event::ButtonPressed{ .. } | mouse::Event::WheelScrolled { .. }
                     ) | Event::Touch(_)
                         | Event::Keyboard(_)
                 )
@@ -760,7 +760,7 @@ where
 
             if matches!(
                 event,
-                Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!()))
+                Event::Mouse(crate::core::released_primary!())
             ) {
                 state.interaction = Interaction::None;
                 return;
@@ -810,7 +810,7 @@ where
                         shell.capture_event();
                     }
                 }
-                Event::Mouse(mouse::Event::ButtonPressed(mouse::ButtonSource::Mouse(mouse::Button::Middle)))
+                Event::Mouse(mouse::pressed_auxiliary!())
                     if self.auto_scroll && matches!(state.interaction, Interaction::None) =>
                 {
                     let Some(origin) = cursor_over_scrollable else {

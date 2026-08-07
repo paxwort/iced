@@ -183,24 +183,6 @@ pub fn window_event(
         WindowEvent::PointerEntered { .. } => Some(Event::Mouse(mouse::Event::CursorEntered)),
         WindowEvent::PointerLeft { .. } => Some(Event::Mouse(mouse::Event::CursorLeft)),
 
-        /*
-        WindowEvent::PointerButton {
-            button: winit::event::ButtonSource::Touch { finger_id, .. },
-            state,
-            position,
-            primary,
-            ..
-        } => {
-            let id = touch::Finger(finger_id.into_raw() as u64);
-            let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
-            let position = Point::new(logical_position.x as f32, logical_position.y as f32);
-            Some(Event::Touch(match state {
-                winit::event::ElementState::Pressed => touch::Event::FingerPressed { id, position },
-                winit::event::ElementState::Released => touch::Event::FingerLifted { id, position },
-            }))
-        }
-        */
-
         WindowEvent::PointerButton {
             button,
             state,
@@ -208,15 +190,17 @@ pub fn window_event(
             primary,
             ..
         } => {
-            //let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
-            //let position = Point::new(logical_position.x as f32, logical_position.y as f32);
 
             let button: crate::mouse::ButtonSource = match button {
                 winit::event::ButtonSource::Mouse(button) => {
                     mouse::ButtonSource::Mouse(mouse_button(button))
                 }
                 winit::event::ButtonSource::TabletTool { kind, button, data } => {
-                    mouse::ButtonSource::TabletTool(tablet_tool_button(button))}
+                    mouse::ButtonSource::TabletTool{
+                        button: tablet_tool_button(button),
+                        kind: tablet_tool_kind(kind),
+                        data: tablet_tool_data(data)
+                    }}
                 winit::event::ButtonSource::Unknown(button) => {
                     mouse::ButtonSource::Mouse(mouse::Button::Other(button))
                 }
@@ -230,12 +214,15 @@ pub fn window_event(
                 }
             };
 
+            let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
+            let position = Point::new(logical_position.x as f32, logical_position.y as f32);
+
             Some(Event::Mouse(match state {
                 winit::event::ElementState::Pressed => {
-                    mouse::Event::ButtonPressed (button)
+                    mouse::Event::ButtonPressed {button, position}
                 }
                 winit::event::ElementState::Released => {
-                    mouse::Event::ButtonReleased (button)
+                    mouse::Event::ButtonReleased {button, position}
                 }
             }))
         }

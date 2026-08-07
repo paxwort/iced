@@ -82,13 +82,10 @@ impl canvas::Program<Message> for SierpinskiGraph {
         let cursor_position = cursor.position_in(bounds)?;
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(button)) => match button {
-                mouse::button_primary!() => Some(canvas::Action::publish(Message::PointAdded(
-                    cursor_position,
-                ))),
-                mouse::button_secondary!() => Some(canvas::Action::publish(Message::PointRemoved)),
-                _ => None,
-            },
+            Event::Mouse(mouse::pressed_primary!()) => Some(canvas::Action::publish(Message::PointAdded(
+                cursor_position,
+            ))),
+            Event::Mouse(mouse::pressed_secondary!()) => Some(canvas::Action::publish(Message::PointRemoved)),
             _ => None,
         }
         .map(canvas::Action::and_capture)

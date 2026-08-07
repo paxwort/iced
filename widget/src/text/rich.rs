@@ -384,7 +384,7 @@ where
         }
 
         match event {
-            Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!())) => {
+            Event::Mouse(crate::core::pressed_primary!()) => {
                 let state = tree
                     .state
                     .downcast_mut::<State<Link, Renderer::Paragraph>>();
@@ -394,7 +394,7 @@ where
                     shell.capture_event();
                 }
             }
-            Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!())) => {
+            Event::Mouse(crate::core::released_primary!()) => {
                 let state = tree
                     .state
                     .downcast_mut::<State<Link, Renderer::Paragraph>>();
