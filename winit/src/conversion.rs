@@ -169,19 +169,17 @@ pub fn window_event(
         WindowEvent::PointerMoved {
             position, source, ..
         } => {
-            let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
-            let position = Point::new(logical_position.x as f32, logical_position.y as f32);
-
             match source {
-                winit::event::PointerSource::Touch { finger_id, force } => {
-                    let id = touch::Finger(finger_id.into_raw() as u64);
-                    Some(Event::Touch(touch::Event::FingerMoved { id, position }))
-                }
-                _ => Some(Event::Mouse(mouse::Event::CursorMoved { position })),
+                winit::event::PointerSource::Touch { finger_id, force } =>
+                    Some(Event::Touch(touch::Event::FingerMoved { id: touch::Finger(finger_id.into_raw() as u64),
+                        position: cursor_position(position, scale_factor) })),
+
+                _ => Some(Event::Mouse(mouse::Event::CursorMoved { position: cursor_position(position, scale_factor),
+                    source: pointer_source(source) })),
             }
         }
-        WindowEvent::PointerEntered { .. } => Some(Event::Mouse(mouse::Event::CursorEntered)),
-        WindowEvent::PointerLeft { .. } => Some(Event::Mouse(mouse::Event::CursorLeft)),
+        WindowEvent::PointerEntered { position, kind, ..  } => Some(Event::Mouse(mouse::Event::CursorEntered{position: cursor_position(position, scale_factor), kind: pointer_kind(kind)})),
+        WindowEvent::PointerLeft { position, kind, ..  } => Some(Event::Mouse(mouse::Event::CursorLeft{position: position.map(|p| cursor_position(p, scale_factor)), kind: pointer_kind(kind)})),
 
         WindowEvent::PointerButton {
             button,
@@ -190,27 +188,30 @@ pub fn window_event(
             primary,
             ..
         } => {
-
             let button: crate::mouse::ButtonSource = match button {
                 winit::event::ButtonSource::Mouse(button) => {
                     mouse::ButtonSource::Mouse(mouse_button(button))
                 }
                 winit::event::ButtonSource::TabletTool { kind, button, data } => {
-                    mouse::ButtonSource::TabletTool{
+                    mouse::ButtonSource::TabletTool {
                         button: tablet_tool_button(button),
                         kind: tablet_tool_kind(kind),
-                        data: tablet_tool_data(data)
-                    }}
+                        data: tablet_tool_data(data),
+                    }
+                }
                 winit::event::ButtonSource::Unknown(button) => {
                     mouse::ButtonSource::Mouse(mouse::Button::Other(button))
                 }
-                winit::event::ButtonSource::Touch { finger_id, ..  } => {
+                winit::event::ButtonSource::Touch { finger_id, .. } => {
                     if primary {
-                       mouse::ButtonSource::Touch(TouchButton::Primary(touch::Finger(finger_id.into_raw() as u64))) }
-                    else {
-                       mouse::ButtonSource::Touch(TouchButton::Other(touch::Finger(finger_id.into_raw() as u64)))
+                        mouse::ButtonSource::Touch(TouchButton::Primary(touch::Finger(
+                            finger_id.into_raw() as u64,
+                        )))
+                    } else {
+                        mouse::ButtonSource::Touch(TouchButton::Other(touch::Finger(
+                            finger_id.into_raw() as u64,
+                        )))
                     }
-
                 }
             };
 
@@ -219,10 +220,10 @@ pub fn window_event(
 
             Some(Event::Mouse(match state {
                 winit::event::ElementState::Pressed => {
-                    mouse::Event::ButtonPressed {button, position}
+                    mouse::Event::ButtonPressed { button, position }
                 }
                 winit::event::ElementState::Released => {
-                    mouse::Event::ButtonReleased {button, position}
+                    mouse::Event::ButtonReleased { button, position }
                 }
             }))
         }
@@ -540,19 +541,48 @@ pub fn mouse_interaction(interaction: mouse::Interaction) -> Option<winit::curso
     Some(icon)
 }
 
+/// Converts a [`winit`] PointerSource into a [`mouse::PointerSource`].
+///
+/// [`winit`]: https://github.com/rust-windowing/winit
+pub fn pointer_source(pointer: winit::event::PointerSource) -> mouse::PointerSource{
+    match pointer {
+        winit::event::PointerSource::Mouse => mouse::PointerSource::Mouse,
+        winit::event::PointerSource::Touch { finger_id, force } =>
+            mouse::PointerSource::Touch(touch::Finger(finger_id.into_raw() as u64)),
+        winit::event::PointerSource::TabletTool { kind, data } =>
+            mouse::PointerSource::TabletTool {
+                kind: tablet_tool_kind(kind),
+                data: tablet_tool_data(data),
+            },
+        winit::event::PointerSource::Unknown => mouse::PointerSource::Unknown,
+    }
+}
+
+/// Converts a [`winit`] PointerKind into a [`mouse::PointerSource`].
+///
+/// [`winit`]: https://github.com/rust-windowing/winit
+pub fn pointer_kind(pointer: winit::event::PointerKind) -> mouse::PointerKind{
+    match pointer {
+        winit::event::PointerKind::Mouse => mouse::PointerKind::Mouse,
+        winit::event::PointerKind::Touch(finger_id) => mouse::PointerKind::Touch(touch::Finger(finger_id.into_raw() as u64)),
+        winit::event::PointerKind::TabletTool(kind) => mouse::PointerKind::TabletTool(tablet_tool_kind(kind)),
+        winit::event::PointerKind::Unknown => mouse::PointerKind::Unknown,
+    }
+}
+
 /// Converts a [`winit`] TabletToolKind into a [`mouse::TabletToolKind`].
 ///
 /// [`winit`]: https://github.com/rust-windowing/winit
 pub fn tablet_tool_kind(kind: winit::event::TabletToolKind) -> mouse::TabletToolKind {
     match kind {
-        winit::event::TabletToolKind::Pen       => mouse::TabletToolKind::Pen     ,
-        winit::event::TabletToolKind::Eraser    => mouse::TabletToolKind::Eraser  ,
-        winit::event::TabletToolKind::Brush     => mouse::TabletToolKind::Brush   ,
-        winit::event::TabletToolKind::Pencil    => mouse::TabletToolKind::Pencil  ,
-        winit::event::TabletToolKind::Airbrush  => mouse::TabletToolKind::Airbrush,
-        winit::event::TabletToolKind::Finger    => mouse::TabletToolKind::Finger  ,
-        winit::event::TabletToolKind::Mouse     => mouse::TabletToolKind::Mouse   ,
-        winit::event::TabletToolKind::Lens      => mouse::TabletToolKind::Lens    ,
+        winit::event::TabletToolKind::Pen => mouse::TabletToolKind::Pen,
+        winit::event::TabletToolKind::Eraser => mouse::TabletToolKind::Eraser,
+        winit::event::TabletToolKind::Brush => mouse::TabletToolKind::Brush,
+        winit::event::TabletToolKind::Pencil => mouse::TabletToolKind::Pencil,
+        winit::event::TabletToolKind::Airbrush => mouse::TabletToolKind::Airbrush,
+        winit::event::TabletToolKind::Finger => mouse::TabletToolKind::Finger,
+        winit::event::TabletToolKind::Mouse => mouse::TabletToolKind::Mouse,
+        winit::event::TabletToolKind::Lens => mouse::TabletToolKind::Lens,
         _ => todo!(),
     }
 }
@@ -563,26 +593,26 @@ pub fn tablet_tool_kind(kind: winit::event::TabletToolKind) -> mouse::TabletTool
 pub fn tablet_tool_data(data: winit::event::TabletToolData) -> mouse::TabletToolData {
     fn force(force: Option<winit::event::Force>) -> Option<mouse::Force> {
         force.map(|force| match force {
-                winit::event::Force::Calibrated {
-                    force,
-                    max_possible_force,
-                } => mouse::Force::Calibrated {
-                    force,
-                    max_possible_force,
-                },
-                winit::event::Force::Normalized(f) => mouse::Force::Normalized(f),
+            winit::event::Force::Calibrated {
+                force,
+                max_possible_force,
+            } => mouse::Force::Calibrated {
+                force,
+                max_possible_force,
+            },
+            winit::event::Force::Normalized(f) => mouse::Force::Normalized(f),
         })
     }
     fn tilt(tilt: Option<winit::event::TabletToolTilt>) -> Option<mouse::TabletToolTilt> {
         tilt.map(|tilt| mouse::TabletToolTilt {
-                x: tilt.x,
-                y: tilt.y,
+            x: tilt.x,
+            y: tilt.y,
         })
     }
     fn angle(angle: Option<winit::event::TabletToolAngle>) -> Option<mouse::TabletToolAngle> {
         angle.map(|angle| mouse::TabletToolAngle {
-                altitude: angle.azimuth,
-                azimuth: angle.altitude,
+            altitude: angle.azimuth,
+            azimuth: angle.altitude,
         })
     }
 

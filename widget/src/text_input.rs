@@ -765,7 +765,7 @@ where
             Event::Mouse(crate::core::released_primary!()) => {
                 state::<Renderer>(tree).is_dragging = None;
             }
-            Event::Mouse(mouse::Event::CursorMoved { position })
+            Event::Mouse(mouse::Event::CursorMoved { position, .. })
             | Event::Touch(touch::Event::FingerMoved { position, .. }) => {
                 let state = state::<Renderer>(tree);
 

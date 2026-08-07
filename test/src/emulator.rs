@@ -9,6 +9,7 @@ use crate::core::widget;
 use crate::core::window;
 use crate::core::{Bytes, Element, Point, Size};
 use crate::instruction;
+use crate::instruction::Mouse;
 use crate::program;
 use crate::program::Program;
 use crate::runtime;
@@ -347,7 +348,7 @@ impl<P: Program + 'static> Emulator<P> {
                 };
 
                 for event in &events {
-                    if let core::Event::Mouse(mouse::Event::CursorMoved { position }) = event {
+                    if let core::Event::Mouse(mouse::Event::CursorMoved { source: mouse::PointerSource::Mouse, position }) = event {
                         self.cursor = mouse::Cursor::Available{position: *position, source: None};
                     }
                 }

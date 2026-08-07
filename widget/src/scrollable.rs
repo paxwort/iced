@@ -568,7 +568,7 @@ where
                 Event::Mouse(
                     mouse::Event::ButtonPressed{ .. }
                     | mouse::Event::ButtonReleased{ .. }
-                    | mouse::Event::CursorLeft,
+                    | mouse::Event::CursorLeft{ .. },
                 ) => true,
                 Event::Mouse(mouse::Event::CursorMoved { .. }) => {
                     last_scrolled.elapsed() > Duration::from_millis(100)
@@ -873,7 +873,7 @@ where
 
                     shell.capture_event();
                 }
-                Event::Mouse(mouse::Event::CursorMoved { position }) => {
+                Event::Mouse(mouse::Event::CursorMoved { position, .. }) => {
                     if let Interaction::AutoScrolling {
                         origin, last_frame, ..
                     } = state.interaction

@@ -1,6 +1,5 @@
-use crate::{Point, mouse::button::ButtonSource};
+use crate::{Point, mouse::{TabletToolData, TabletToolKind, button::ButtonSource}, touch::Finger};
 
-use super::Button;
 
 /// A mouse event.
 ///
@@ -11,13 +10,24 @@ use super::Button;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Event {
     /// The mouse cursor entered the window.
-    CursorEntered,
-
+    CursorEntered {
+        /// The kind of pointer that entered
+        kind: PointerKind,
+        /// The new position of the mouse cursor
+        position: Point,
+    },
     /// The mouse cursor left the window.
-    CursorLeft,
+    CursorLeft{
+        /// The kind of pointer that left
+        kind: PointerKind,
+        /// The new position of the mouse cursor, or `None`
+        position: Option<Point>,
+    },
 
     /// The mouse cursor was moved
     CursorMoved {
+        /// The pointer source that was moved
+        source: PointerSource,
         /// The new position of the mouse cursor
         position: Point,
     },
@@ -63,6 +73,23 @@ pub enum ScrollDelta {
         /// The number of vertical pixels scrolled
         y: f32,
     },
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PointerSource{
+    Mouse,
+    Touch(Finger),
+    TabletTool{kind: TabletToolKind, data: TabletToolData},
+    Unknown
+}
+#[allow(missing_docs)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PointerKind{
+    Mouse,
+    Touch(Finger),
+    TabletTool(TabletToolKind),
+    Unknown
 }
 
 
