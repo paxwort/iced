@@ -2,6 +2,8 @@
 //!
 //! [`winit`]: https://github.com/rust-windowing/winit
 //! [`iced_runtime`]: https://github.com/iced-rs/iced/tree/master/runtime
+use iced_debug::core::mouse::TouchButton;
+
 use crate::core::input_method;
 use crate::core::keyboard;
 use crate::core::mouse;
@@ -181,10 +183,12 @@ pub fn window_event(
         WindowEvent::PointerEntered { .. } => Some(Event::Mouse(mouse::Event::CursorEntered)),
         WindowEvent::PointerLeft { .. } => Some(Event::Mouse(mouse::Event::CursorLeft)),
 
+        /*
         WindowEvent::PointerButton {
             button: winit::event::ButtonSource::Touch { finger_id, .. },
             state,
             position,
+            primary,
             ..
         } => {
             let id = touch::Finger(finger_id.into_raw() as u64);
@@ -195,16 +199,17 @@ pub fn window_event(
                 winit::event::ElementState::Released => touch::Event::FingerLifted { id, position },
             }))
         }
+        */
 
         WindowEvent::PointerButton {
             button,
             state,
             position,
-            device_id,
             primary,
+            ..
         } => {
-            let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
-            let position = Point::new(logical_position.x as f32, logical_position.y as f32);
+            //let logical_position = position.to_logical::<f64>(f64::from(scale_factor));
+            //let position = Point::new(logical_position.x as f32, logical_position.y as f32);
 
             let button: crate::mouse::ButtonSource = match button {
                 winit::event::ButtonSource::Mouse(button) => {
@@ -215,8 +220,13 @@ pub fn window_event(
                 winit::event::ButtonSource::Unknown(button) => {
                     mouse::ButtonSource::Mouse(mouse::Button::Other(button))
                 }
-                winit::event::ButtonSource::Touch { .. } => {
-                    unreachable!("Touch handled previously")
+                winit::event::ButtonSource::Touch { finger_id, ..  } => {
+                    if primary {
+                       mouse::ButtonSource::Touch(TouchButton::Primary(touch::Finger(finger_id.into_raw() as u64))) }
+                    else {
+                       mouse::ButtonSource::Touch(TouchButton::Other(touch::Finger(finger_id.into_raw() as u64)))
+                    }
+
                 }
             };
 

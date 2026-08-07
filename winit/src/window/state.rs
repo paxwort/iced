@@ -1,11 +1,11 @@
-use crate::conversion;
+use crate::conversion::{self, tablet_tool_kind};
 use crate::core::renderer;
 use crate::core::{Color, Size};
 use crate::core::{mouse, theme, window};
 use crate::graphics::Viewport;
 use crate::program::{self, Program};
 
-use winit::event::{WindowEvent};
+use winit::event::{TabletToolKind, WindowEvent};
 use winit::window::Window;
 
 use std::fmt::{Debug, Formatter};
@@ -19,6 +19,7 @@ where
     viewport: Viewport,
     surface_version: u64,
     cursor_position: Option<winit::dpi::PhysicalPosition<f64>>,
+    tablet_tool_data: Option<(winit::event::TabletToolKind, winit::event::TabletToolData)>,
     modifiers: winit::keyboard::ModifiersState,
     theme: Option<P::Theme>,
     theme_mode: theme::Mode,
@@ -75,6 +76,7 @@ where
             viewport,
             surface_version: 0,
             cursor_position: None,
+            tablet_tool_data: None,
             modifiers: winit::keyboard::ModifiersState::default(),
             theme,
             theme_mode,
@@ -167,10 +169,24 @@ where
                 );
                 self.surface_version += 1;
             }
-            WindowEvent::PointerMoved { position, .. } => {
+
+            WindowEvent::PointerMoved { position, source, ..  } => {
+                if let winit::event::PointerSource::TabletTool { kind, data } = source {
+                    self.tablet_tool_data = Some((*kind, data.clone()));
+                }
                 self.cursor_position = Some(*position);
             }
-            WindowEvent::PointerLeft { position, .. } => {
+            WindowEvent::PointerButton { position, button, ..  } => {
+                if let winit::event::ButtonSource::TabletTool { kind, data, .. } = button {
+                    self.tablet_tool_data = Some((*kind, data.clone()));
+                }
+                self.cursor_position = Some(*position);
+            }
+
+            WindowEvent::PointerLeft { position, kind, .. } => {
+                if matches!(kind, winit::event::PointerKind::TabletTool(..)){
+                    self.tablet_tool_data = None;
+                }
                 self.cursor_position = *position;
             }
             WindowEvent::ModifiersChanged(new_modifiers) => {
