@@ -2,6 +2,7 @@ mod controls;
 mod scene;
 
 use controls::Controls;
+use iced_wgpu::core::mouse::CursorSource;
 use scene::Scene;
 
 use iced_wgpu::graphics::{Shell, Viewport};
@@ -319,11 +320,14 @@ pub fn main() -> Result<(), winit::error::EventLoopError> {
                         }
                     }
                 }
-                WindowEvent::PointerMoved { position, .. } => {
-                    *cursor = mouse::Cursor::Available(conversion::cursor_position(
+                WindowEvent::PointerMoved { position, ..  } => {
+                    *cursor = mouse::Cursor::Available{
+                        position: conversion::cursor_position(
                         position,
                         viewport.scale_factor(),
-                    ));
+                    ),
+                        source: None,
+                    };
                 }
                 WindowEvent::ModifiersChanged(new_modifiers) => {
                     *modifiers = new_modifiers.state();

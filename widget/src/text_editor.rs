@@ -1205,14 +1205,14 @@ impl<Message> Update<Message> {
 
         match event {
             Event::Mouse(event) => match event {
-                mouse::Event::ButtonPressed(crate::core::button_primary!()) => {
+                mouse::Event::ButtonPressed(btn_src @ crate::core::button_primary!()) => {
                     if let Some(cursor_position) = cursor.position_in(bounds) {
                         let cursor_position =
                             cursor_position - Vector::new(padding.left, padding.top);
 
                         let click = mouse::Click::new(
                             cursor_position,
-                            mouse::Button::Left,
+                            *btn_src,
                             state.last_click,
                         );
 

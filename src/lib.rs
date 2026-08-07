@@ -595,7 +595,7 @@ pub mod keyboard {
 
 pub mod mouse {
     //! Listen and react to mouse events.
-    pub use crate::core::mouse::{Button, Cursor, Event, Interaction, ScrollDelta};
+    pub use crate::core::mouse::*;
 }
 
 pub mod system {

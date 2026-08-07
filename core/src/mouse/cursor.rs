@@ -22,6 +22,7 @@ pub enum Cursor {
     Unavailable,
 }
 
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CursorSource{
     TabletTool(TabletToolData)

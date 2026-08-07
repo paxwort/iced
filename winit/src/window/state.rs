@@ -1,4 +1,4 @@
-use crate::conversion::{self, tablet_tool_kind};
+use crate::conversion::{self, tablet_tool_data};
 use crate::core::renderer;
 use crate::core::{Color, Size};
 use crate::core::{mouse, theme, window};
@@ -112,8 +112,13 @@ where
     pub fn cursor(&self) -> mouse::Cursor {
         self.cursor_position
             .map(|cursor_position| {
+                let source = if let Some((kind, data)) = self.tablet_tool_data.clone(){
+                    Some(mouse::CursorSource::TabletTool(tablet_tool_data(data)))
+                } else {
+                    None
+                };
                 mouse::Cursor::Available{
-                    position: conversion::cursor_position(cursor_position, self.viewport.scale_factor()),
+                    position: crate::conversion::cursor_position(cursor_position, self.viewport.scale_factor()),
                     source: None
                 }
             })

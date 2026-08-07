@@ -348,8 +348,7 @@ fn update<Message: Clone, Theme, Renderer>(
     }
 
     match event {
-        Event::Mouse(mouse::Event::ButtonPressed(crate::core::button_primary!()))
-        | Event::Touch(touch::Event::FingerPressed { .. }) => {
+        Event::Mouse(mouse::Event::ButtonPressed(btnsrc @ crate::core::button_primary!())) => {
             if let Some(message) = widget.on_press.as_ref() {
                 shell.publish(message.clone());
                 shell.capture_event();
@@ -359,7 +358,7 @@ fn update<Message: Clone, Theme, Renderer>(
                 && let Some(message) = widget.on_double_click.as_ref()
             {
                 let new_click =
-                    mouse::Click::new(position, mouse::Button::Left, state.previous_click);
+                    mouse::Click::new(position, *btnsrc, state.previous_click);
 
                 if new_click.kind() == mouse::click::Kind::Double {
                     shell.publish(message.clone());
@@ -372,8 +371,7 @@ fn update<Message: Clone, Theme, Renderer>(
                 shell.capture_event();
             }
         }
-        Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!()))
-        | Event::Touch(touch::Event::FingerLifted { .. }) => {
+        Event::Mouse(mouse::Event::ButtonReleased(crate::core::button_primary!())) => {
             if let Some(message) = widget.on_release.as_ref() {
                 shell.publish(message.clone());
             }
