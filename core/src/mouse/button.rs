@@ -1,7 +1,5 @@
 use super::tablet_tool::{TabletToolButton, TabletToolData, TabletToolKind};
 /// The source of a button.
-/// Also provides opinionated interpretation of buttons based on the language at https://www.w3.org/TR/pointerevents/
-///
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ButtonSource {
     /// The mouse
@@ -14,34 +12,6 @@ pub enum ButtonSource {
         data: TabletToolData },
     /// "Button" sources from other touch events
     Touch (TouchButton),
-}
-
-
-/// Shorthand to match a primary button on any pointer source
-#[macro_export]
-macro_rules! button_primary{
-    () => {
-        $crate::mouse::ButtonSource::Mouse($crate::mouse::Button::Left)
-        | $crate::mouse::ButtonSource::TabletTool{ button: $crate::mouse::TabletToolButton::Contact, .. }
-        | $crate::mouse::ButtonSource::Touch($crate::mouse::TouchButton::Primary(_))
-    };
-}
-
-/// Shorthand to match a secondary button on any pointer source
-#[macro_export]
-macro_rules! button_secondary{
-    () => {
-        $crate::mouse::ButtonSource::Mouse($crate::mouse::Button::Right)
-        | $crate::mouse::ButtonSource::TabletTool{ button: $crate::mouse::TabletToolButton::Barrel,..}
-    };
-}
-
-/// Shorthand to match an auxiliary button on any pointer source (at the moment, that's just Middle Mouse Button)
-#[macro_export]
-macro_rules! button_auxiliary{
-    () => {
-        $crate::mouse::ButtonSource::Mouse($crate::mouse::Button::Middle)
-    };
 }
 
 /// A touch event

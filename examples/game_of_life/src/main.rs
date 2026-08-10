@@ -400,34 +400,23 @@ mod grid {
                     )
                 }
                 Event::Mouse(mouse_event) => match mouse_event {
-                    mouse::Event::ButtonPressed{button, ..} => {
-                        let message = match button {
-                            mouse::button_primary!() => {
-                                *interaction = if is_populated {
-                                    Interaction::Erasing
-                                } else {
-                                    Interaction::Drawing
-                                };
-
-                                populate.or(unpopulate)
-                            }
-                            mouse::button_secondary!() => {
-                                *interaction = Interaction::Panning {
-                                    translation: self.translation,
-                                    start: cursor_position,
-                                };
-
-                                None
-                            }
-                            _ => None,
+                    mouse::pressed_primary!() => {
+                        *interaction = if is_populated {
+                            Interaction::Erasing
+                        } else {
+                            Interaction::Drawing
                         };
 
-                        Some(
-                            message
-                                .map(canvas::Action::publish)
-                                .unwrap_or(canvas::Action::request_redraw())
-                                .and_capture(),
-                        )
+                        Some(populate.or(unpopulate).map(canvas::Action::publish)
+                        .unwrap_or(canvas::Action::request_redraw())
+                        .and_capture())
+                    }
+                    mouse::pressed_secondary!() =>{
+                        *interaction = Interaction::Panning {
+                            translation: self.translation,
+                            start: cursor_position,
+                        };
+                        None
                     }
 
                     mouse::Event::CursorMoved { .. } => {

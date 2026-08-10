@@ -2,7 +2,6 @@ mod controls;
 mod scene;
 
 use controls::Controls;
-use iced_wgpu::core::mouse::CursorSource;
 use scene::Scene;
 
 use iced_wgpu::graphics::{Shell, Viewport};
