@@ -30,7 +30,6 @@
 //! ```
 use std::ops::RangeInclusive;
 
-use iced_runtime::core::button_primary;
 
 pub use crate::slider::{Catalog, Handle, HandleShape, Status, Style, StyleFn, default};
 

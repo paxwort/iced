@@ -1,5 +1,4 @@
 //! Zoom and pan on an image.
-use iced_runtime::core::button_primary;
 use iced_runtime::core::mouse::Button;
 
 use crate::core::border;

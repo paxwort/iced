@@ -1,7 +1,4 @@
 //! A container for capturing mouse events.
-use iced_runtime::core::button_auxiliary;
-use iced_runtime::core::button_secondary;
-
 use crate::core::layout;
 use crate::core::mouse;
 use crate::core::overlay;
