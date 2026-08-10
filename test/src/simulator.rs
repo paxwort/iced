@@ -122,7 +122,7 @@ where
     ///
     /// This does _not_ produce mouse movement events!
     pub fn point_at(&mut self, position: impl Into<Point>) {
-        self.cursor = mouse::Cursor::Available{position: position.into(), source: None};
+        self.cursor = mouse::Cursor::Available(position.into());
     }
 
     /// Clicks the [`Bounded`] target found by the given [`Selector`], if any.

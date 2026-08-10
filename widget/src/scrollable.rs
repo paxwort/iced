@@ -729,7 +729,7 @@ where
                     Some(cursor_position)
                         if !(mouse_over_x_scrollbar || mouse_over_y_scrollbar) =>
                     {
-                        mouse::Cursor::Available{position: cursor_position + translation, source: cursor.source()}
+                        mouse::Cursor::Available(cursor_position)
 
                     }
                     _ => cursor.levitate() + translation,
@@ -1040,7 +1040,7 @@ where
 
         let cursor = match cursor_over_scrollable {
             Some(cursor_position) if !(mouse_over_x_scrollbar || mouse_over_y_scrollbar) => {
-                mouse::Cursor::Available{position: cursor_position + translation, source: cursor.source()}
+                mouse::Cursor::Available(cursor_position + translation)
             }
             _ => cursor.levitate() + translation,
         };
@@ -1198,7 +1198,7 @@ where
 
         let cursor = match cursor_over_scrollable {
             Some(cursor_position) if !(mouse_over_x_scrollbar || mouse_over_y_scrollbar) => {
-                mouse::Cursor::Available{position: cursor_position + translation, source: cursor.source()}
+                mouse::Cursor::Available(cursor_position + translation)
             }
             _ => cursor.levitate() + translation,
         };

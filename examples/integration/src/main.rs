@@ -321,13 +321,11 @@ pub fn main() -> Result<(), winit::error::EventLoopError> {
                     }
                 }
                 WindowEvent::PointerMoved { position, ..  } => {
-                    *cursor = mouse::Cursor::Available{
-                        position: conversion::cursor_position(
+                    *cursor = mouse::Cursor::Available(
+                        conversion::cursor_position(
                         position,
                         viewport.scale_factor(),
-                    ),
-                        source: None,
-                    };
+                    ))
                 }
                 WindowEvent::ModifiersChanged(new_modifiers) => {
                     *modifiers = new_modifiers.state();

@@ -1535,7 +1535,7 @@ fn run_action<'a, P, C>(
             }
             window::Action::ShowSystemMenu(id) => {
                 if let Some(window) = window_manager.get_mut(id)
-                    && let mouse::Cursor::Available{position, .. } = window.state.cursor()
+                    && let mouse::Cursor::Available(position) = window.state.cursor()
                 {
                     window.raw.show_window_menu(winit::dpi::LogicalPosition {
                         x: position.x,

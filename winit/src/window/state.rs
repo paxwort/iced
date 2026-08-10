@@ -112,15 +112,7 @@ where
     pub fn cursor(&self) -> mouse::Cursor {
         self.cursor_position
             .map(|cursor_position| {
-                let source = if let Some((kind, data)) = self.tablet_tool_data.clone(){
-                    Some(mouse::CursorSource::TabletTool(tablet_tool_data(data)))
-                } else {
-                    None
-                };
-                mouse::Cursor::Available{
-                    position: crate::conversion::cursor_position(cursor_position, self.viewport.scale_factor()),
-                    source: None
-                }
+                mouse::Cursor::Available(crate::conversion::cursor_position(cursor_position, self.viewport.scale_factor()))
             })
             .unwrap_or(mouse::Cursor::Unavailable)
     }

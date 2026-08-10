@@ -82,7 +82,7 @@ where
                         overlay.overlay(layout, renderer).map(|nested| {
                             nested.as_overlay().mouse_interaction(
                                 nested_layout.children().next().unwrap(),
-                                mouse::Cursor::Available{position, source: cursor.source()},
+                                mouse::Cursor::Available(position),
                                 renderer,
                             ) != mouse::Interaction::None
                         })
@@ -187,7 +187,7 @@ where
                             .map(|position| {
                                 overlay.mouse_interaction(
                                     layout,
-                                    mouse::Cursor::Available{position, source: cursor.source()},
+                                    mouse::Cursor::Available(position),
                                     renderer,
                                 ) != mouse::Interaction::None
                             })

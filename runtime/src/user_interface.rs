@@ -285,7 +285,7 @@ where
                     .map(|position| {
                         overlay.mouse_interaction(
                             Layout::new(&layout),
-                            mouse::Cursor::Available{position, source: cursor.source()},
+                            mouse::Cursor::Available(position),
                             renderer,
                         )
                     })
