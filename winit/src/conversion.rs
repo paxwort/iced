@@ -82,10 +82,11 @@ pub fn window_attributes(
         target_os = "openbsd"
     ))]
     {
-        use ::winit::platform::wayland::WindowAttributesExtWayland;
+        use ::winit::platform::wayland::WindowAttributesWayland;
 
         if let Some(id) = _id {
-            attributes = attributes.with_name(id.clone(), id);
+            let window_attribs = WindowAttributesWayland::default().with_name(id.clone(), id);
+            attributes = attributes.with_platform_attributes(window_attribs.box_clone());
         }
     }
 
