@@ -112,35 +112,39 @@ pub fn window_attributes(
 
     #[cfg(target_os = "macos")]
     {
-        use winit::platform::macos::WindowAttributesExtMacOS;
-
-        attributes = attributes
+        use winit::platform::macos::WindowAttributesMacOS;
+        let mac_attribs = WindowAttributsMacOs::default()
             .with_title_hidden(settings.platform_specific.title_hidden)
             .with_titlebar_transparent(settings.platform_specific.titlebar_transparent)
             .with_fullsize_content_view(settings.platform_specific.fullsize_content_view);
+
+        attributes = attributes.with_platform_attributes(mac_attribs.box_clone());
     }
 
     #[cfg(target_os = "linux")]
     {
         #[cfg(feature = "x11")]
         {
-            use winit::platform::x11::WindowAttributesExtX11;
-
-            attributes = attributes
+            use winit::{platform::x11::WindowAttributesX11, window::PlatformWindowAttributes};
+            let x11_attribs = WindowAttributesX11::default()
                 .with_override_redirect(settings.platform_specific.override_redirect)
                 .with_name(
                     &settings.platform_specific.application_id,
                     &settings.platform_specific.application_id,
                 );
+
+            attributes = attributes.with_platform_attributes(x11_attribs.box_clone());
         }
         #[cfg(feature = "wayland")]
         {
-            use winit::platform::wayland::WindowAttributesExtWayland;
-
-            attributes = attributes.with_name(
+            use winit::{
+                platform::wayland::WindowAttributesWayland, window::PlatformWindowAttributes,
+            };
+            let wayland_attribs = WindowAttributesWayland::default().with_name(
                 &settings.platform_specific.application_id,
                 &settings.platform_specific.application_id,
             );
+            attributes = attributes.with_platform_attributes(wayland_attribs.box_clone());
         }
     }
 
@@ -168,18 +172,31 @@ pub fn window_event(
         WindowEvent::CloseRequested => Some(Event::Window(window::Event::CloseRequested)),
         WindowEvent::PointerMoved {
             position, source, ..
-        } => {
-            match source {
-                winit::event::PointerSource::Touch { finger_id, force } =>
-                    Some(Event::Touch(touch::Event::FingerMoved { id: touch::Finger(finger_id.into_raw() as u64),
-                        position: cursor_position(position, scale_factor) })),
-
-                _ => Some(Event::Mouse(mouse::Event::CursorMoved { position: cursor_position(position, scale_factor),
-                    source: pointer_source(source) })),
+        } => match source {
+            winit::event::PointerSource::Touch { finger_id, force } => {
+                Some(Event::Touch(touch::Event::FingerMoved {
+                    id: touch::Finger(finger_id.into_raw() as u64),
+                    position: cursor_position(position, scale_factor),
+                }))
             }
+
+            _ => Some(Event::Mouse(mouse::Event::CursorMoved {
+                position: cursor_position(position, scale_factor),
+                source: pointer_source(source),
+            })),
+        },
+        WindowEvent::PointerEntered { position, kind, .. } => {
+            Some(Event::Mouse(mouse::Event::CursorEntered {
+                position: cursor_position(position, scale_factor),
+                kind: pointer_kind(kind),
+            }))
         }
-        WindowEvent::PointerEntered { position, kind, ..  } => Some(Event::Mouse(mouse::Event::CursorEntered{position: cursor_position(position, scale_factor), kind: pointer_kind(kind)})),
-        WindowEvent::PointerLeft { position, kind, ..  } => Some(Event::Mouse(mouse::Event::CursorLeft{position: position.map(|p| cursor_position(p, scale_factor)), kind: pointer_kind(kind)})),
+        WindowEvent::PointerLeft { position, kind, .. } => {
+            Some(Event::Mouse(mouse::Event::CursorLeft {
+                position: position.map(|p| cursor_position(p, scale_factor)),
+                kind: pointer_kind(kind),
+            }))
+        }
 
         WindowEvent::PointerButton {
             button,
@@ -544,16 +561,18 @@ pub fn mouse_interaction(interaction: mouse::Interaction) -> Option<winit::curso
 /// Converts a [`winit`] PointerSource into a [`mouse::PointerSource`].
 ///
 /// [`winit`]: https://github.com/rust-windowing/winit
-pub fn pointer_source(pointer: winit::event::PointerSource) -> mouse::PointerSource{
+pub fn pointer_source(pointer: winit::event::PointerSource) -> mouse::PointerSource {
     match pointer {
         winit::event::PointerSource::Mouse => mouse::PointerSource::Mouse,
-        winit::event::PointerSource::Touch { finger_id, force } =>
-            mouse::PointerSource::Touch(touch::Finger(finger_id.into_raw() as u64)),
-        winit::event::PointerSource::TabletTool { kind, data } =>
+        winit::event::PointerSource::Touch { finger_id, force } => {
+            mouse::PointerSource::Touch(touch::Finger(finger_id.into_raw() as u64))
+        }
+        winit::event::PointerSource::TabletTool { kind, data } => {
             mouse::PointerSource::TabletTool {
                 kind: tablet_tool_kind(kind),
                 data: tablet_tool_data(data),
-            },
+            }
+        }
         winit::event::PointerSource::Unknown => mouse::PointerSource::Unknown,
     }
 }
@@ -561,11 +580,15 @@ pub fn pointer_source(pointer: winit::event::PointerSource) -> mouse::PointerSou
 /// Converts a [`winit`] PointerKind into a [`mouse::PointerSource`].
 ///
 /// [`winit`]: https://github.com/rust-windowing/winit
-pub fn pointer_kind(pointer: winit::event::PointerKind) -> mouse::PointerKind{
+pub fn pointer_kind(pointer: winit::event::PointerKind) -> mouse::PointerKind {
     match pointer {
         winit::event::PointerKind::Mouse => mouse::PointerKind::Mouse,
-        winit::event::PointerKind::Touch(finger_id) => mouse::PointerKind::Touch(touch::Finger(finger_id.into_raw() as u64)),
-        winit::event::PointerKind::TabletTool(kind) => mouse::PointerKind::TabletTool(tablet_tool_kind(kind)),
+        winit::event::PointerKind::Touch(finger_id) => {
+            mouse::PointerKind::Touch(touch::Finger(finger_id.into_raw() as u64))
+        }
+        winit::event::PointerKind::TabletTool(kind) => {
+            mouse::PointerKind::TabletTool(tablet_tool_kind(kind))
+        }
         winit::event::PointerKind::Unknown => mouse::PointerKind::Unknown,
     }
 }
